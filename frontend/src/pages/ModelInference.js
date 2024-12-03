@@ -45,7 +45,7 @@ const ModelInference = () => {
         endpoint = "/generate/refractor-mistral";
       }
       else if (model === "GPT-3.5" && operation === "Optimization") {
-        endpoint = "/generate/security-gpt";
+        endpoint = "/generate/optimize-gpt";
       }
       else if (model === "GPT-3.5" && operation === "Security-Vulnerability-Finding") {
         endpoint = "/generate/security-gpt";
@@ -68,9 +68,12 @@ const ModelInference = () => {
       }
 
       const ngrokUrl = "https://3273-34-56-87-104.ngrok-free.app"; // Replace with your ngrok URL
+      const localBaseUrl = "http://localhost:8000";
+     
+      const baseUrl = endpoint.includes("gpt") ? localBaseUrl: ngrokUrl;
       console.log("Constructed endpoint:", `${ngrokUrl}${endpoint}`);
-      // Send input to the backend
-      const res = await fetch(`${ngrokUrl}${endpoint}`, {
+      // Send input to the backend{
+      const res = await fetch(`${baseUrl}${endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +81,9 @@ const ModelInference = () => {
         body: JSON.stringify({ prompt: input }),
       });
 
+
       const result = await res.json();
+      console.log(result);
       setResponse(result.response || "No response received.");
     } catch (error) {
       console.error("Error during inference:", error);
