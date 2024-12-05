@@ -1,9 +1,6 @@
 name: Code Validation Pipeline
 
 on:
-  push:
-    paths:
-      - "Backend/sample_codes/**"
   pull_request:
     paths:
       - "Backend/sample_codes/**"
