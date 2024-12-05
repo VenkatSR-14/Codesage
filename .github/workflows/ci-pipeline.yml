@@ -25,7 +25,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: "3.10.0"  # Specify Python version clearly (e.g., 3.10 instead of "3.10.x")
+          python-version: "3.10.11"  # Specify Python version clearly (e.g., 3.10 instead of "3.10.x")
           cache: "pip"  # Caches dependencies installed via pip to save time in subsequent runs
 
       # Step 4: Install dependencies
