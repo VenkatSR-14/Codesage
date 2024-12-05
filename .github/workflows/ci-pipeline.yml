@@ -15,11 +15,13 @@ jobs:
 
       - name: Get modified files
         id: modified_files
+        shell: powershell
         run: |
           git diff --name-only ${{ github.event.before || 'HEAD^' }} ${{ github.sha }} > modified_files.txt
-          if (-not (Get-Content modified_files.txt)) {
+          if (-not (Test-Path modified_files.txt) -or -not (Get-Content modified_files.txt)) {
             echo "No valid files to process."
             exit 0
+          }
 
       - name: List Files in Backend
         run: ls -R Backend
@@ -32,7 +34,6 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      # Step 5: Wait for Server to Start
       - name: Wait for Server
         run: |
           echo "Waiting for FastAPI server to start..."
