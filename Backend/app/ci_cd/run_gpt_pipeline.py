@@ -6,8 +6,8 @@ import chardet
 print("Running validation pipeline...")
 
 # Environment setup
-SECURITY_ENDPOINT = "http://localhost:8000/security-gpt"
-OPTIMIZE_ENDPOINT = "http://localhost:8000/optimize-gpt"
+SECURITY_ENDPOINT = "http://localhost:8000/generate/security-gpt"
+OPTIMIZE_ENDPOINT = "http://localhost:8000/generate/optimize-gpt"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Initialize OpenAI API key
