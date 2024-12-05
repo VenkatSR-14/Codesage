@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from __main__ import mistral_model_code_optimize, mistral_model_security, mistral_model_patch, tokenizer  # Use the preloaded model and tokenizer
+from __main__ import mistral_model_code_optimize, tokenizer  # Use the preloaded model and tokenizer
 import re
 import torch
 
@@ -55,7 +55,6 @@ def generate_response(prompt, model, max_new_tokens=512, temperature=0.2, top_p=
     Generates a response from the preloaded model.
     """
     try:
-        
         # Tokenize the input prompt
         inputs = tokenizer(prompt, return_tensors="pt").to("cuda")
 
@@ -99,52 +98,6 @@ def optimization_mistral(request: InferenceRequest):
         # Generate the response using the model
         response = generate_response(
             model=mistral_model_code_optimize,
-            prompt=zero_shot_prompt,
-            max_new_tokens=request.max_new_tokens,
-            temperature=request.temperature,
-            top_p=request.top_p,
-            repetition_penalty=request.repetition_penalty,
-        )
-
-        return {"prompt": zero_shot_prompt, "response": response}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error: {e}")
-
-@app.post("/generate/security-mistral")
-def security_mistral(request: InferenceRequest):
-    """
-    Endpoint for security analysis tasks using Mistral.
-    """
-    try:
-        # Format the zero-shot prompt
-        zero_shot_prompt = format_prompt(request.context, request.code)
-
-        # Generate the response using the model
-        response = generate_response(
-            model=mistral_model_security,
-            prompt=zero_shot_prompt,
-            max_new_tokens=request.max_new_tokens,
-            temperature=request.temperature,
-            top_p=request.top_p,
-            repetition_penalty=request.repetition_penalty,
-        )
-
-        return {"prompt": zero_shot_prompt, "response": response}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error: {e}")
-
-@app.post("/generate/code-refactoring-mistral")
-def code_refactoring_mistral(request: InferenceRequest):
-    """
-    Endpoint for code refactoring tasks using Mistral.
-    """
-    try:
-        # Format the zero-shot prompt
-        zero_shot_prompt = format_prompt(request.context, request.code)
-
-        # Generate the response using the model
-        response = generate_response(
-            model=mistral_model_patch,
             prompt=zero_shot_prompt,
             max_new_tokens=request.max_new_tokens,
             temperature=request.temperature,

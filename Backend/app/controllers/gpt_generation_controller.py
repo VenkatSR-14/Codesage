@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from app.Services.gpt_services import generate_optimized_code, analyze_code_security
+from app.Services.gpt_services import generate_optimized_code, analyze_code_security, generate_code_review_analysis
 from app.models.gpt_request_models import GPTRequest
 from datasets import Dataset, load_dataset
 import pandas as pd
@@ -7,7 +7,7 @@ import pandas as pd
 #loading datasets
 security_dataset = load_dataset("CyberNative/Code_Vulnerability_Security_DPO")
 code_optimization_dataset=  load_dataset("Dahoas/code-review-instruct-critique-revision-python")
-code_review_patch_dataset = pd.read_csv("dataset/code_review_data.csv")
+code_review_dataset = pd.read_csv("dataset/code_review_data.csv")
 
 
 router = APIRouter(
@@ -49,3 +49,20 @@ async def security_analysis_gpt(request: GPTRequest):
         return {"prompt": request.prompt, "response": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error analyzing security: {str(e)}")
+
+@router.post("/code-refractoring-gpt")
+async def code_review_analysis(request: GPTRequest):
+    """
+    Endpoint to analyze a code diff for review comments.
+    """
+    try:
+        # Generate response using service logic
+        response = generate_code_review_analysis(
+            code_diff=request.prompt,
+            max_tokens=request.max_tokens,
+            temperature=request.temperature,
+            top_p=request.top_p
+        )
+        return {"prompt": request.prompt, "response": response}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating code review analysis: {str(e)}")

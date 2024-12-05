@@ -3,8 +3,8 @@ import re
 import random
 import os
 from dotenv import load_dotenv
-
-
+from openai import Completion
+import pandas as pd
 
  #Function to detect language
 def detect_language(code):
@@ -199,3 +199,38 @@ def analyze_code_security(dataset, code: str, max_tokens: int, temperature: floa
         top_p=top_p,
     )
     return response.choices[0].message['content'].strip()
+
+
+def generate_code_review_analysis(code_diff: str, max_tokens: int, temperature: float, top_p: float) -> str:
+    """
+    Generates a code review analysis based on the provided diff.
+    """
+    try:
+        # Create the message array
+        messages = [
+            {"role": "system", "content": "You are a code review assistant."},
+            {"role": "user", "content": f"""
+            ### Code Review Task:
+            Review the following code diff for correctness and clarity. If everything is fine, respond with: "Everything is fine, LGTM." If there are issues, provide specific feedback and suggestions for improvement.
+
+            ### Code Diff:
+            {code_diff}
+
+            ### Feedback and Suggestions (Response):
+            """}
+        ]
+
+        # Call the AI model (e.g., OpenAI GPT) to generate a response
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=messages,
+            max_tokens=max_tokens,
+            temperature=temperature,
+            top_p=top_p,
+        )
+        
+        # Extract the model's response
+        return response.choices[0].message['content']
+
+    except Exception as e:
+        raise RuntimeError(f"Error generating code review analysis: {str(e)}")
