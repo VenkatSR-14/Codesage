@@ -13,33 +13,23 @@ jobs:
     runs-on: [self-hosted, Windows, X64]
 
     steps:
-      # Step 1: Check out the repository
       - name: Check out repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0  # Fetch the entire Git history
 
-      # Step 2: Debug git commits
-      - name: Debug git commits
-        run: |
-          Write-Output "Before commit: ${{ github.event.before }}"
-          Write-Output "After commit: ${{ github.sha }}"
-
-      # Step 3: Get modified files
       - name: Get modified files
         id: modified_files
         run: |
           git diff --name-only ${{ github.event.before || 'HEAD^' }} ${{ github.sha }} > modified_files.txt
           if (-not (Get-Content modified_files.txt)) {
-            Write-Output "No modified files."
+            echo "No valid files to process."
             exit 0
           }
 
-      # Step 4: List modified files
-      - name: List modified files
-        run: Get-Content modified_files.txt
+      - name: Debug modified files
+        run: |
+          echo "Modified files:"
+          cat modified_files.txt
 
-      # Step 5: Run the validation script
       - name: Run validation script
         run: python Backend/app/ci_cd/run_gpt_pipeline.py
         env:
