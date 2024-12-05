@@ -1,0 +1,38 @@
+name: Code Validation Pipeline
+
+# Trigger workflow on push to main or pull requests to main
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate-code:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Check out the repository
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.10  # Specify the Python version
+
+      # Step 3: Install dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r Backend/requirements.txt  # Adjust path if needed
+
+      # Step 4: Run the validation script with OpenAI API Key
+      - name: Run validation script
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}  # Use GitHub Secrets to store the OpenAI API key
+        run: |
+          python Backend/gpt_server.py  # Adjust path to your script if necessary
