@@ -1,6 +1,5 @@
 import sqlite3
 import numpy as np
-
 # Connect to the database
 connection = sqlite3.connect("users.db")
 cursor = connection.cursor()
@@ -14,6 +13,7 @@ CREATE TABLE IF NOT EXISTS users (
 )
 `)
 connection.commit()
+
 # Simulate user login
 def login(username, password):
     query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
