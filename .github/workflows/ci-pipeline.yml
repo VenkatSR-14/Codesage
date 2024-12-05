@@ -26,18 +26,22 @@ jobs:
           }
       - name: List Files in Backend
         run: ls -R Backend
-      
+
       - name: Start Uvicorn Server
         shell: powershell
         run: |
-          uvicorn app.main:app --host 0.0.0.0 --port 8000
+          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
+          for ($i = 0; $i -lt 10; $i++) {
+            try {
+              Invoke-WebRequest -Uri http://localhost:8000/docs -UseBasicParsing
+              echo "Server is up."
+              break
+            } catch {
+              echo "Waiting for server..."
+              Start-Sleep -Seconds 2
+            }
+          }
         working-directory: Backend
-
-      # Step 5: Wait for Server to Start
-      - name: Wait for Server
-        run: |
-          echo "Waiting for FastAPI server to start..."
-          sleep 5  # Wait for the server to initialize
 
       - name: Debug modified files
         run: |
