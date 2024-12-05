@@ -1,5 +1,6 @@
 import sqlite3
 import pandas as pd
+import torch
 # Connect to the database
 connection = sqlite3.connect("users.db")
 cursor = connection.cursor()
