@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS users (
 )
 `)
 connection.commit()
-
 # Simulate user login
 def login(username, password):
     query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"
