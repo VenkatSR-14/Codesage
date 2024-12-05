@@ -24,11 +24,13 @@ jobs:
             echo "No valid files to process."
             exit 0
           }
-      
+      - name: List Files in Backend
+        run: ls -R Backend
       - name: Start Uvicorn Server
         shell: powershell
         run: |
           uvicorn app.main:app --host 0.0.0.0 --port 8000
+        working-directory: Backend
 
       # Step 5: Wait for Server to Start
       - name: Wait for Server
