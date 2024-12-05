@@ -1,9 +1,6 @@
 name: Code Validation Pipeline
 
 on:
-  push:
-    paths:
-      - "Backend/sample_codes/**"
   pull_request:
     paths:
       - "Backend/sample_codes/**"
@@ -19,11 +16,11 @@ jobs:
       - name: Get modified files
         id: modified_files
         run: |
-          git diff --name-only ${{ github.event.before || 'HEAD^' }} ${{ github.sha }} > modified_files.txt
-          if (-not (Get-Content modified_files.txt)) {
+          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > modified_files.txt
+          if [ ! -s modified_files.txt ]; then
             echo "No valid files to process."
             exit 0
-          }
+          fi
 
       - name: List Files in Backend
         run: ls -R Backend
@@ -36,7 +33,6 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      # Wait for the server to start
       - name: Wait for Server
         run: |
           echo "Waiting for FastAPI server to start..."
@@ -52,11 +48,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      - name: Revert changes on failure
-        if: failure()
+      - name: Stop Uvicorn Server
+        shell: powershell
         run: |
-          echo "Reverting repository to last known good state..."
-          git config --global user.email "github-actions[bot]@github.com"
-          git config --global user.name "GitHub Actions Bot"
-          git reset --hard ${{ github.event.before || 'HEAD^' }}
-          git push https://${{ secrets.SECRET_GIT_TOKEN }}@github.com/${{ github.repository }} HEAD --force
+          Stop-Process -Name uvicorn -Force
