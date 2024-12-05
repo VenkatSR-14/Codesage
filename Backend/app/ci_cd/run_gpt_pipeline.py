@@ -1,20 +1,29 @@
 import requests
 import os
 import openai
-import chardet  # Add chardet to detect encoding
+import chardet
 
-print("running")
+print("Running validation pipeline...")
+
 # Environment setup
 SECURITY_ENDPOINT = "http://localhost:8000/security-gpt"
 OPTIMIZE_ENDPOINT = "http://localhost:8000/optimize-gpt"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-BASE_PATH = "C:\\Users\\18573\\OneDrive\\Desktop\\New_Repo\\CodeSage\\"
 
 # Initialize OpenAI API key
 if not OPENAI_API_KEY:
     raise EnvironmentError("OPENAI_API_KEY is not set. Ensure it is stored as an environment variable or secret.")
 
 openai.api_key = OPENAI_API_KEY
+
+def detect_file_encoding(file_path):
+    """
+    Detects the encoding of the file.
+    """
+    with open(file_path, "rb") as file:
+        raw_data = file.read(1000)  # Read a portion of the file
+        result = chardet.detect(raw_data)
+        return result.get("encoding", "utf-8")  # Default to utf-8 if detection fails
 
 def get_modified_files(file_path="modified_files.txt"):
     """
@@ -32,20 +41,11 @@ def get_modified_files(file_path="modified_files.txt"):
         files = [line.strip() for line in file.readlines()]  # Remove newline and extra spaces
 
     # Filter out invalid or non-existent files
-    valid_files = [BASE_PATH + f for f in files if f and os.path.isfile(BASE_PATH + f)]  # Convert to absolute paths
+    valid_files = [f for f in files if f and os.path.isfile(f)]
     if not valid_files:
         raise Exception(f"No valid files found in '{file_path}'. Check the content and paths.")
 
     return valid_files
-
-def detect_file_encoding(file_path):
-    """
-    Detects the encoding of the file.
-    """
-    with open(file_path, "rb") as file:
-        raw_data = file.read(1000)  # Read a portion of the file
-        result = chardet.detect(raw_data)
-        return result.get("encoding", "utf-8")  # Default to utf-8 if detection fails
 
 def read_file_contents(file_path):
     """
@@ -55,7 +55,7 @@ def read_file_contents(file_path):
     try:
         encoding = detect_file_encoding(file_path)
         print(f"Detected encoding for {file_path}: {encoding}")
-        with open(file_path, "r") as file:
+        with open(file_path, "r", encoding=encoding) as file:
             return file.read()
     except Exception as e:
         raise Exception(f"Error reading file {file_path}: {e}")
