@@ -26,8 +26,5 @@ def login(username, password):
         print("Invalid username or password.")
 
 # Input from the user
-user_input_username = input("Enter your username: ")
-user_input_password = input("Enter your password: ")
-login(user_input_username, user_input_password)
 
 connection.close()
