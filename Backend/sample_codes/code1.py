@@ -6,18 +6,6 @@ import sqlite3
 # Create a users table if it doesn't exist
 
 
-connection = sqlite3.connect("users.db")
-cursor = connection.cursor()
-
-cursor.execute(`
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT,
-    password TEXT
-)
-`)
-connection.commit()
-
 # Simulate user login
 def login(username, password):
     query = f"SELECT * FROM users WHERE username = '{username}' AND password = '{password}'"

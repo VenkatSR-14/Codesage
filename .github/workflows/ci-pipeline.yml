@@ -37,8 +37,6 @@ jobs:
           cat modified_files.txt
 
       # Step 6: Debug environment variables (Optional for Debugging)
-      - name: Debug environment
-        run: env
 
       # Step 7: Run the validation script
       - name: Run validation script
