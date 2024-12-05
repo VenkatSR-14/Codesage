@@ -103,7 +103,7 @@ def process_file(file_path):
     print(f"Running security analysis for {file_path}...")
     security_result = post_request(
         SECURITY_ENDPOINT,
-        {"prompt": code_snippet, "max_tokens": 300, "temperature": 0.7, "top_p": 1.0}
+        {"prompt": code_snippet, "max_tokens": 1500, "temperature": 0.7, "top_p": 1.0}
     )
     print(f"Security Analysis Result for {file_path}:\n{security_result}")
 
@@ -117,7 +117,7 @@ def process_file(file_path):
     print(f"Running code optimization for {file_path}...")
     optimized_result = post_request(
         OPTIMIZE_ENDPOINT,
-        {"prompt": code_snippet, "max_tokens": 300, "temperature": 0.7, "top_p": 1.0}
+        {"prompt": code_snippet, "max_tokens": 1500, "temperature": 0.7, "top_p": 1.0}
     )
     print(f"Optimized Code for {file_path}:\n{optimized_result}")
 
