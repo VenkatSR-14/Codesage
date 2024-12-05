@@ -40,6 +40,6 @@ jobs:
 
       # Step 7: Run the validation script
       - name: Run validation script
-        run: python app/ci_cd/run_gpt_pipeline.py
+        run: python Backend/app/ci_cd/run_gpt_pipeline.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
