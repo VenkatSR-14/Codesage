@@ -3,42 +3,47 @@ name: Code Validation Pipeline
 on:
   push:
     paths:
-      - "Backend/sample_codes/**"  # Trigger only if files in Backend/sample_codes are modified
+      - "Backend/sample_codes/**"
   pull_request:
     paths:
-      - "Backend/sample_codes/**"  # Trigger only if files in Backend/sample_codes are modified
+      - "Backend/sample_codes/**"
 
 jobs:
   validate-code:
-    runs-on: [self-hosted, Windows, X64]  # Ensure the job runs on your self-hosted Windows runner
+    runs-on: [self-hosted, Windows, X64]
 
     steps:
       # Step 1: Check out the repository
       - name: Check out repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch the entire Git history
 
-      # Step 2: Verify Python version (For Debugging)
-      - name: Verify Python version
-        run: python --version
-
-
-      # Step 4: Install dependencies
-      - name: Install dependencies
+      # Step 2: Debug git commits
+      - name: Debug git commits
         run: |
-          python -m pip install --upgrade pip
-          pip install -r Backend/requirements.txt
+          echo "Before commit: ${{ github.event.before }}"
+          echo "After commit: ${{ github.sha }}"
 
-      # Step 5: Get modified files
+      # Step 3: Get modified files
       - name: Get modified files
         id: modified_files
         run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} > modified_files.txt
-          echo "Modified files:"
-          cat modified_files.txt
+          git diff --name-only ${{ github.event.before || 'HEAD^' }} ${{ github.sha }} > modified_files.txt || echo "No modified files."
 
-      # Step 6: Debug environment variables (Optional for Debugging)
+      # Step 4: Check if modified files exist
+      - name: Check if modified files exist
+        run: |
+          if [ ! -s modified_files.txt ]; then
+            echo "No modified files detected."
+            exit 0
+          fi
 
-      # Step 7: Run the validation script
+      # Step 5: List modified files
+      - name: List modified files
+        run: cat modified_files.txt
+
+      # Step 6: Run the validation script
       - name: Run validation script
         run: python Backend/app/ci_cd/run_gpt_pipeline.py
         env:
