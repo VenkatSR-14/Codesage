@@ -1,5 +1,2 @@
 openai
 pandas
-os
-dotenv
-pandas
