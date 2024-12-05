@@ -24,6 +24,7 @@ jobs:
             echo "No valid files to process."
             exit 0
           }
+      
       - name: Start FastAPI Backend Server
         run: |
           uvicorn app.main:app --host 0.0.0.0 --port 8000 &
