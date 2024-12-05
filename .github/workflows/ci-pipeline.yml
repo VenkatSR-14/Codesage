@@ -1,17 +1,16 @@
 name: Code Validation Pipeline
 
-# Trigger workflow on push or pull request only for changes in the "Backend" folder
 on:
   push:
     paths:
-      - "Backend/sample_codes/**"  # Trigger only if files in Backend folder are modified
+      - "Backend/sample_codes/**"  # Trigger only if files in Backend/sample_codes are modified
   pull_request:
     paths:
-      - "Backend/sample_codes/**"  # Trigger only if files in Backend folder are modified
+      - "Backend/sample_codes/**"  # Trigger only if files in Backend/sample_codes are modified
 
 jobs:
   validate-code:
-    runs-on: self-hosted  # Use self-hosted runner to support localhost testing
+    runs-on: self-hosted  # Ensure your runner is set up correctly
 
     steps:
       # Step 1: Check out the repository
@@ -22,7 +21,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.9  # Specify the Python version
+          python-version: 3.10
 
       # Step 3: Install dependencies
       - name: Install dependencies
@@ -30,61 +29,14 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r Backend/requirements.txt
 
-      # Step 4: Get the List of Modified Files
-      - name: Get Modified Files
+      # Step 4: Get modified files
+      - name: Get modified files
         id: modified_files
         run: |
           git diff --name-only ${{ github.event.before }} ${{ github.sha }} > modified_files.txt
-          cat modified_files.txt
-        working-directory: Backend
 
-      # Step 5: Read Modified Files
-      - name: Prepare Prompt
-        id: prepare_prompt
-        run: |
-          echo "{" > payload.json
-          echo '"prompt": "' >> payload.json
-          for file in $(cat modified_files.txt); do
-            echo "$(cat $file)" >> payload.json
-          done
-          echo '"' >> payload.json
-          echo "}" >> payload.json
-        working-directory: Backend
-
-      # Step 6: Start the FastAPI Server
-      - name: Start FastAPI Backend Server
-        run: |
-          uvicorn app.main:app --host 0.0.0.0 --port 8000 &
-        working-directory: Backend  # Adjust to the location of your FastAPI code
+      # Step 5: Run the validation script
+      - name: Run validation script
+        run: python app/ci_cd/run_gpt_pipeline.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-
-      # Step 7: Wait for Server to Start
-      - name: Wait for Server
-        run: |
-          echo "Waiting for FastAPI server to start..."
-          sleep 5  # Wait for the server to initialize
-
-      # Step 8: Call Optimize Endpoint with File Contents
-      - name: Call Optimize Endpoint
-        run: |
-          curl -X POST http://localhost:8000/generate/optimize-gpt \
-          -H "Content-Type: application/json" \
-          -d @payload.json
-        working-directory: Backend
-
-      # Step 9: Call Security Analysis Endpoint with File Contents
-      - name: Call Security Analysis Endpoint
-        run: |
-          curl -X POST http://localhost:8000/generate/security-gpt \
-          -H "Content-Type: application/json" \
-          -d @payload.json
-        working-directory: Backend
-
-      # Step 10: Call Code Review Endpoint with File Contents
-      - name: Call Code Review Endpoint
-        run: |
-          curl -X POST http://localhost:8000/generate/code-refractoring-gpt \
-          -H "Content-Type: application/json" \
-          -d @payload.json
-        working-directory: Backend

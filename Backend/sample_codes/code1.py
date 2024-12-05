@@ -29,3 +29,5 @@ def login(username, password):
 user_input_username = input("Enter your username: ")
 user_input_password = input("Enter your password: ")
 login(user_input_username, user_input_password)
+
+connection.close()
