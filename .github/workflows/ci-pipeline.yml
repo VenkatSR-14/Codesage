@@ -10,36 +10,26 @@ on:
 
 jobs:
   validate-code:
-    runs-on: self-hosted  # Use self-hosted runner
+    runs-on: self-hosted
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
 
-      - name: Debug Python version
-        run: python3 --version
+      - name: Verify Python version
+        run: python --version
 
-      - name: Install Python 3.9
-        run: |
-          sudo apt update
-          sudo apt install -y python3.9 python3.9-venv python3.9-dev
-          sudo update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.9 1
-          sudo update-alternatives --config python3
-
-      - name: Debug Python version again
-        run: python3 --version
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
-          python3 -m pip install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r Backend/requirements.txt
 
-      - name: Get modified files
-        id: modified_files
-        run: |
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} > modified_files.txt
-
       - name: Run validation script
-        run: python3 app/ci_cd/run_gpt_pipeline.py
+        run: python app/ci_cd/run_gpt_pipeline.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
