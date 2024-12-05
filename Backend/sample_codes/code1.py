@@ -1,4 +1,5 @@
 import sqlite3
+import numpy as np
 # Connect to the database
 connection = sqlite3.connect("users.db")
 cursor = connection.cursor()
