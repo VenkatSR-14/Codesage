@@ -51,3 +51,12 @@ jobs:
         run: python Backend/app/ci_cd/run_gpt_pipeline.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+
+      - name: Revert changes on failure
+        if: failure()
+        run: |
+          echo "Reverting repository to last known good state..."
+          git reset --hard ${{ github.event.before || 'HEAD^' }}
+          git push origin HEAD --force
+        env:
+          GITHUB_TOKEN: ${{ secrets.SECRET_GIT_TOKEN }}
