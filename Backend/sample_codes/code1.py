@@ -5,7 +5,14 @@ connection = sqlite3.connect("users.db")
 cursor = connection.cursor()
 
 # Create a users table if it doesn't exist
-
+cursor.execute(`
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT,
+    password TEXT
+)
+`)
+connection.commit()
 
 # Simulate user login
 def login(username, password):
@@ -19,9 +26,5 @@ def login(username, password):
         print("Invalid username or password.")
 
 # Input from the user
-user_input_username = input("Enter your username: ")
-user_input_password = input("Enter your password: ")
-# adding random comments
-login(user_input_username, user_input_password)
 
 connection.close()
