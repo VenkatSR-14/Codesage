@@ -12,45 +12,31 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # Fetch full history to ensure all commits are available
-
-      - name: Fetch base branch
-        run: |
-          # Ensure we fetch the base branch to compare changes
-          git fetch origin ${{ github.event.pull_request.base.ref }}
 
       - name: Get modified files
         id: modified_files
         run: |
-          # Use base and head SHA to get the list of changed files
-          git diff --name-only origin/${{ github.event.pull_request.base.ref }} ${{ github.event.pull_request.head.sha }} > modified_files.txt
-          # Check if the file list is empty
-          if (!(Get-Content modified_files.txt | Where-Object { $_.Trim() -ne "" })) {
+          git diff --name-only ${{ github.event.before || 'HEAD^' }} ${{ github.sha }} > modified_files.txt
+          if (-not (Get-Content modified_files.txt)) {
             echo "No valid files to process."
             exit 0
 
-      - name: Debug modified files
-        run: |
-          echo "Modified files:"
-          cat modified_files.txt
-
       - name: List Files in Backend
         run: ls -R Backend
-
+      
       - name: Start Uvicorn Server
-        shell: pwsh
+        shell: powershell
         run: |
-          Start-Process -FilePath uvicorn -ArgumentList "app.main:app --host 0.0.0.0 --port 8000" -NoNewWindow -PassThru
+          Start-Process -FilePath uvicorn -ArgumentList "app.main:app", "--host", "0.0.0.0", "--port", "8000" -NoNewWindow -PassThru
         working-directory: Backend
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
-      # Wait for the server to start
+      # Step 5: Wait for Server to Start
       - name: Wait for Server
         run: |
           echo "Waiting for FastAPI server to start..."
-          sleep 10  # Adjust if the server takes longer to initialize
+          sleep 10  # Wait for the server to initialize
 
       - name: Debug modified files
         run: |
