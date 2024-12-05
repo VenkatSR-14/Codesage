@@ -2,30 +2,54 @@ name: Code Validation Pipeline
 
 on:
   pull_request:
+    branches:
+      - main  # Trigger only when the PR targets the `main` branch
     paths:
-      - "Backend/sample_codes/**"
+      - "Backend/sample_codes/**"  # Restrict to changes in this path
 
 jobs:
   validate-code:
     runs-on: [self-hosted, Windows, X64]
 
     steps:
+      # Step 1: Check out repository
       - name: Check out repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch entire history to compare branches
 
+      # Step 2: Fetch main branch and compare changes
       - name: Get modified files
         id: modified_files
         shell: powershell
         run: |
-          git diff --name-only ${{ github.event.before || 'HEAD^' }} ${{ github.sha }} > modified_files.txt
+          # Fetch the main branch to compare
+          git fetch origin main:main
+
+          # Get the list of modified files between the PR branch and main
+          git diff --name-only main...HEAD > modified_files.txt
+
+          # Check if modified_files.txt is empty
           if (-not (Test-Path modified_files.txt) -or -not (Get-Content modified_files.txt)) {
             echo "No valid files to process."
             exit 0
           }
 
+      # Step 3: Debug modified files
+      - name: Debug modified files
+        shell: powershell
+        run: |
+          echo "Modified files:"
+          Get-Content modified_files.txt
+
+      # Step 4: List Files in Backend Directory
       - name: List Files in Backend
-        run: ls -R Backend
-      
+        shell: powershell
+        run: |
+          echo "Files in Backend folder:"
+          Get-ChildItem -Recurse Backend
+
+      # Step 5: Start Uvicorn Server
       - name: Start Uvicorn Server
         shell: powershell
         run: |
@@ -34,17 +58,17 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
+      # Step 6: Wait for Server to Start
       - name: Wait for Server
+        shell: powershell
         run: |
           echo "Waiting for FastAPI server to start..."
-          sleep 10  # Wait for the server to initialize
+          Start-Sleep -Seconds 10  # Wait for the server to initialize
 
-      - name: Debug modified files
-        run: |
-          echo "Modified files:"
-          cat modified_files.txt
-
+      # Step 7: Run validation script
       - name: Run validation script
-        run: python Backend/app/ci_cd/run_gpt_pipeline.py
+        shell: powershell
+        run: |
+          python Backend/app/ci_cd/run_gpt_pipeline.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
