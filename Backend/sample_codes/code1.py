@@ -1,6 +1,4 @@
 import sqlite3
-import pandas as pd
-
 # Connect to the database
 connection = sqlite3.connect("users.db")
 cursor = connection.cursor()
