@@ -3,10 +3,12 @@ import os
 import openai
 import chardet  # Add chardet to detect encoding
 
+print("running")
 # Environment setup
 SECURITY_ENDPOINT = "http://localhost:8000/security-gpt"
 OPTIMIZE_ENDPOINT = "http://localhost:8000/optimize-gpt"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+BASE_PATH = "C:\\Users\\18573\\OneDrive\\Desktop\\New_Repo\\CodeSage\\"
 
 # Initialize OpenAI API key
 if not OPENAI_API_KEY:
@@ -16,13 +18,25 @@ openai.api_key = OPENAI_API_KEY
 
 def get_modified_files(file_path="modified_files.txt"):
     """
-    Reads the list of modified files from 'modified_files.txt'.
+    Reads the list of modified files from 'modified_files.txt', detects encoding, and ensures valid file paths.
     """
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File '{file_path}' not found. Ensure it exists and contains file paths.")
-    with open(file_path, "r", encoding="utf-8") as file:
-        files = [line.strip() for line in file.readlines()]
-        return [f for f in files if f and os.path.isfile(f)]  # Filter valid files
+
+    # Detect encoding of the file
+    encoding = detect_file_encoding(file_path)
+    print(f"Detected encoding for '{file_path}': {encoding}")
+
+    # Read the file using the detected encoding
+    with open(file_path, "r", encoding=encoding) as file:
+        files = [line.strip() for line in file.readlines()]  # Remove newline and extra spaces
+
+    # Filter out invalid or non-existent files
+    valid_files = [BASE_PATH + f for f in files if f and os.path.isfile(BASE_PATH + f)]  # Convert to absolute paths
+    if not valid_files:
+        raise Exception(f"No valid files found in '{file_path}'. Check the content and paths.")
+
+    return valid_files
 
 def detect_file_encoding(file_path):
     """
@@ -41,7 +55,7 @@ def read_file_contents(file_path):
     try:
         encoding = detect_file_encoding(file_path)
         print(f"Detected encoding for {file_path}: {encoding}")
-        with open(file_path, "r", encoding=encoding) as file:
+        with open(file_path, "r") as file:
             return file.read()
     except Exception as e:
         raise Exception(f"Error reading file {file_path}: {e}")
