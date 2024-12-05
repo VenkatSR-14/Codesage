@@ -1,6 +1,9 @@
 name: Code Validation Pipeline
 
 on:
+  push:
+    paths:
+      - "Backend/sample_codes/**"
   pull_request:
     paths:
       - "Backend/sample_codes/**"
@@ -16,11 +19,11 @@ jobs:
       - name: Get modified files
         id: modified_files
         run: |
-          git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} > modified_files.txt
-          if [ ! -s modified_files.txt ]; then
+          git diff --name-only ${{ github.event.before || 'HEAD^' }} ${{ github.sha }} > modified_files.txt
+          if (-not (Get-Content modified_files.txt)) {
             echo "No valid files to process."
             exit 0
-          fi
+          }
 
       - name: List Files in Backend
         run: ls -R Backend
@@ -33,6 +36,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
 
+      # Wait for the server to start
       - name: Wait for Server
         run: |
           echo "Waiting for FastAPI server to start..."
@@ -47,8 +51,3 @@ jobs:
         run: python Backend/app/ci_cd/run_gpt_pipeline.py
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-
-      - name: Stop Uvicorn Server
-        shell: powershell
-        run: |
-          Stop-Process -Name uvicorn -Force
