@@ -1,17 +1,23 @@
-import sqlite3
-import numpy as np
-# Connect to the database
-connection = sqlite3.connect("users.db")
-cursor = connection.cursor()
+# Basic user storage
+users = []
 
-# Create a users table if it doesn't exist
-cursor.execute(`
-CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT,
-    password TEXT
-)
-`)
-connection.commit()
+# Register a user
+def register_user(username):
+    if username in users:
+        print("Username already exists.")
+    else:
+        users.append(username)
+        print("User registered successfully!")
 
-# Simulate user login
+# Login a user
+def login(username):
+    if username in users:
+        print("Login successful!")
+    else:
+        print("Username not found.")
+
+# Example usage
+register_user("Alice")
+register_user("Bob")
+login("Alice")  # Login successful!
+login("Charlie")  # Username not found.
