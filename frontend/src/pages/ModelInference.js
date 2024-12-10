@@ -37,12 +37,18 @@ const ModelInference = () => {
         endpoint = "/generate/security-mistral";
       } else if (model === "Mistral" && operation === "Code-Refactoring") {
         endpoint = "/generate/code-refractoring-mistral";
+      } else if (model === "Llama" && operation === "Optimization") {
+        endpoint = "/generate/optimize-llama";
+      } else if (model === "Llama" && operation === "Security-Vulnerability-Finding") {
+        endpoint = "/generate/security-llama";
+      } else if (model === "Llama" && operation === "Code-Refactoring") {
+        endpoint = "/generate/code-refractoring-llama";
       } else {
         setResponse("Unsupported model or operation combination.");
         return;
       }
 
-      const ngrokUrl = "https://fef6-34-124-175-221.ngrok-free.app"; // Replace with your ngrok URL
+      const ngrokUrl = "https://3092-34-41-194-171.ngrok-free.app"; // Replace with your ngrok URL
       const localBaseUrl = "http://localhost:8000";
       const baseUrl = endpoint.includes("gpt") ? localBaseUrl : ngrokUrl;
 
