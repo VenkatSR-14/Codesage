@@ -28,7 +28,8 @@ def detect_file_encoding(file_path):
 def get_modified_files(file_path="modified_files.txt"):
     """
     Reads the list of modified files from 'modified_files.txt', detects encoding, 
-    and filters files to process only those in '/Backend/sample_codes' directory.
+
+    and filters files to process only those in '/Backend/sample_codes'.
     """
     if not os.path.exists(file_path):
         raise FileNotFoundError(f"File '{file_path}' not found. Ensure it exists and contains file paths.")
@@ -41,11 +42,9 @@ def get_modified_files(file_path="modified_files.txt"):
     with open(file_path, "r", encoding=encoding) as file:
         files = [line.strip() for line in file.readlines()]  # Remove newline and extra spaces
 
-    # Filter files in 'Backend/sample_codes' directory
-    valid_files = [
-        f for f in files
-        if f.startswith("Backend/sample_codes/") and os.path.isfile(f)  # Match specific folder
-    ]
+
+    # Filter files in '/Backend/sample_codes' directory
+    valid_files = [f for f in files if f and "Backend/sample_codes" in f and os.path.isfile(f)]
 
     if not valid_files:
         print("OK")  # No valid files found
