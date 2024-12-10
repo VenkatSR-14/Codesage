@@ -1,14 +1,18 @@
-public class DeleteFileProgram {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter the name of the file to delete: ");
-        String filename = scanner.nextLine();
+import os
 
-        File file = new File(filename);
-        if (file.delete()) {
-            System.out.println("File deleted successfully.");
-        } else {
-            System.out.println("File not found or could not be deleted.");
-        }
-    }
-}
+def delete_file(filename):
+    """
+    Deletes a file based on user-provided input.
+    """
+    try:
+        if os.path.exists(filename):
+            os.remove(filename)
+            print("File deleted successfully.")
+        else:
+            print("File not found.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    filename = input("Enter the name of the file to delete: ")
+    delete_file(filename)
