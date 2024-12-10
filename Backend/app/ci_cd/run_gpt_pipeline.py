@@ -77,12 +77,27 @@ def post_request(endpoint, payload):
 def validate_with_gpt(message):
     """
     Validates the message (security or optimization result) with GPT.
+    Returns 'OK' for valid results and 'NOK' if any vulnerabilities or issues are found.
     """
     try:
         messages = [
-            {"role": "system", "content": "You are a code validation assistant. Validate the result."},
-            {"role": "user", "content": f"Here is the result:\n\n{message}\n\nRespond with 'OK' or 'NOK' only."}
+            {
+                "role": "system",
+                "content": (
+                    "You are a highly skilled security and code optimization validation assistant. "
+                    "Your job is to analyze the given code analysis result for vulnerabilities or issues. "
+                    "Respond with 'OK' if the result contains no vulnerabilities or issues, and 'NOK' "
+                    "if any vulnerabilities, weaknesses, or potential problems are identified. "
+                    "Be strict and ensure no issues are overlooked."
+                ),
+            },
+            {
+                "role": "user",
+                "content": f"Here is the analysis result to validate:\n\n{message}\n\n"
+                           "Respond with 'OK' if no issues, or 'NOK' if there are vulnerabilities or problems.",
+            },
         ]
+
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
