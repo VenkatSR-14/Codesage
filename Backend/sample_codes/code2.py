@@ -1,5 +1,5 @@
-def greet_user():
-    print(f"Hello")
+def add_1_2():
+    return 1 + 2
 
 if __name__ == "__main__":
-    greet_user()
+    add_1_2()
