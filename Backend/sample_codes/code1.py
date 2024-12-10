@@ -1,23 +1,14 @@
-# Basic user storage
-users = []
+public class DeleteFileProgram {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the name of the file to delete: ");
+        String filename = scanner.nextLine();
 
-# Register a user
-def register_user(username):
-    if username in users:
-        print("Username already exists.")
-    else:
-        users.append(username)
-        print("User registered successfully!")
-
-# Login a user
-def login(username):
-    if username in users:
-        print("Login successful!")
-    else:
-        print("Username not found.")
-
-# Example usage
-register_user("Alice")
-register_user("Bob")
-login("Alice")  # Login successful!
-login("Charlie")  # Username not found.
+        File file = new File(filename);
+        if (file.delete()) {
+            System.out.println("File deleted successfully.");
+        } else {
+            System.out.println("File not found or could not be deleted.");
+        }
+    }
+}
