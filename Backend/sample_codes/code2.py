@@ -1,3 +1,6 @@
-# This code is just for example purposes. Dont be too critical here.
+def greet_user():
+    name = input("Enter your name: ")
+    print(f"Hello, {name}!")
+
 if __name__ == "__main__":
-    print(1 + 2)
+    greet_user()
