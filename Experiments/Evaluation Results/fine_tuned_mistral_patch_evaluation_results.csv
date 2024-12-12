@@ -1,0 +1,287 @@
+Prompt,Reference,Prediction,ROUGE-1,ROUGE-2,ROUGE-L,ROUGE-Lsum
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code lang: c
+code diff:
+[KEEP]OB        jmp      test10
+[KEEP]         END_FUNC(FUNCNAME)
+[KEEP] #undef FUNCNAME
+[KEEP] 
+[DEL]        /* Test 14: restore on fault for gpr reserved in multiple phases */
+[ADD]        /* Test 14: restore on fault for gpr reserved in multiple phases,
+[ADD]         * where the two spill regions are nested. In this case, the reg
+[ADD]         * will be restored from the spill slot used by the first (app2app)
+[ADD]         * phase.
+[ADD]         */
+[KEEP] #define FUNCNAME test_asm_faultF
+[KEEP]         DECLARE_FUNC_SEH(FUNCNAME)
+[KEEP] GLOBAL_LABEL(FUNCNAME:)
+
+    ### Feedback and Suggestions (Response):
+
+","everything is fine, LGTM.","everything is fine, LGTM.",1.0,1.0,1.0,1.0
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code lang: js
+code diff:
+[KEEP]describe('ngBind*', function() {
+[KEEP]       $rootScope.$digest();
+[KEEP]       expect(element.text()).toEqual('-0false');
+[KEEP]     }));
+[ADD]
+[ADD]
+[ADD]    it('should not update text when ng-once attribute is specified', inject(function($rootScope, $compile) {
+[ADD]      element = $compile('<p ng-bind=""foo"" ng-once></p>')($rootScope);
+[ADD]      $rootScope.foo = ""test!"";
+[ADD]      $rootScope.$digest();
+[ADD]      expect(element.text()).toBe(""test!"");
+[ADD]
+[ADD]      $rootScope.foo = ""testier!"";
+[ADD]      $rootScope.$digest();
+[ADD]      expect(element.text()).toBe(""test!"");
+[ADD]    }));
+[ADD]
+[ADD]
+[ADD]    it('should not update text when ng-lazy attribute is specified, once there is a value', inject(function($rootScope, $compile) {
+[ADD]      element = $compile('<p ng-bind=""foo"" ng-lazy></p>')($rootScope);
+[ADD]      $rootScope.$digest();
+[ADD]      expect(element.text()).toBe("""");
+[ADD]
+[ADD]      $rootScope.foo = ""test!"";
+[ADD]      $rootScope.$digest();
+[ADD]      expect(element.text()).toBe(""test!"");
+[ADD]
+[ADD]      $rootScope.foo = ""testier!"";
+[ADD]      $rootScope.$digest();
+[ADD]      expect(element.text()).toBe(""test!"");
+[ADD]    }));
+[KEEP]   });
+[KEEP] 
+[KEEP]
+
+    ### Feedback and Suggestions (Response):
+
+","everything is fine, LGTM.","everything is fine, LGTM.",1.0,1.0,1.0,1.0
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code lang: java
+code diff:
+[KEEP]package org.apache.iceberg.mr.hive;
+[KEEP] import java.math.BigDecimal;
+[KEEP] import java.sql.Date;
+[KEEP] import java.sql.Timestamp;
+[DEL]import java.time.Instant;
+[KEEP] import java.util.List;
+[KEEP] import java.util.stream.Collectors;
+[KEEP] import org.apache.hadoop.hive.ql.io.sarg.ExpressionTree;
+
+    ### Feedback and Suggestions (Response):
+
+","everything is fine, LGTM.","everything is fine, LGTM.",1.0,1.0,1.0,1.0
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code lang: cpp
+code diff:
+[KEEP]void ProcessGroupNCCL::WorkNCCL::synchronize() {
+[KEEP]     auto currentStream = at::cuda::getCurrentCUDAStream(devices_[i].index());
+[KEEP]     // Block the current stream on the NCCL stream
+[KEEP]     cudaEvents_[i].block(currentStream);
+[ADD]    // If we use the work to do barrier, we should block here
+[ADD]    if (!barrierTensors_.empty()) {
+[ADD]      at::cuda::OptionalCUDAGuard gpuGuard;
+[ADD]      gpuGuard.set_index(devices_[i].index());
+
+    ### Feedback and Suggestions (Response):
+
+","This can be a normal CUDAGuard constructed with the index, instead of using the optional one and then setting the device.
+refinement:
+     cudaEvents_[i].block(currentStream);
+     // If we use the work to do barrier, we should block here
+     if (!barrierTensors_.empty()) {
++      at::cuda::CUDAGuard gpuGuard(devices_[i]);
+       AT_CUDA_CHECK(cudaStreamSynchronize(currentStream.stream()));
+     }
+   }","This line can be removed since `gpuGuard` will not be used in this function anymore.
+refinement:
+   }
+   for (int i = 0; i < devices_.size(); ++i) {
++    auto currentStream = at::cuda::getCurrentCUDAStream(devices_[i].index());
++    // Block the current stream on the NCCL stream
+     cudaEvents_[i].block(currentStream);
+   }",0.39175257731958757,0.12631578947368421,0.2268041237113402,0.39175257731958757
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code lang: py
+code diff:
+[KEEP]def _transpose_for_scores(self, x):
+[KEEP]         x = x.view(*new_x_shape)
+[KEEP]         return x.permute(0, 2, 1, 3)
+[KEEP] 
+[ADD]    @staticmethod
+[ADD]    def _apply_mask(values: torch.FloatTensor, mask: torch.BoolTensor) -> torch.FloatTensor:
+[ADD]        if len(mask.shape) == 2:
+[ADD]            # We create a 4D attention mask from a 2D tensor mask.
+[ADD]            # The shape is `batch_size x 1 x 1 x target_seq_len` which is broadcast
+[ADD]            # to `batch_size x num_attention_heads x source_seq_len x target_seq_len`
+[ADD]            mask = mask.unsqueeze(1).unsqueeze(2)
+[ADD]        # `mask==1` to convert float tensors.
+[ADD]        mask = (~(mask == 1)) * nn_util.min_value_of_dtype(values.dtype)
+
+    ### Feedback and Suggestions (Response):
+
+","I'm not sure it makes sense to use the min value for the type. For one thing, that tensor might get cast to float16 later, and for another, it might be weird to have a value there that goes to `-inf` at the drop of a hat.
+refinement:
+             # to `batch_size x num_attention_heads x source_seq_len x target_seq_len`
+             mask = mask.unsqueeze(1).unsqueeze(2)
+         # `mask==1` to convert float tensors.
++        mask = (~(mask == 1)) * -10e5  # to ensure that the model also works in half-precision mode.
+         return values + mask
+     def forward(","1. I think we should use `torch.finfo()` instead of hardcoding min value here. ```suggestion mask = ~(mask == 1) * values.dtype.finfo().min ```
+    2. It seems that this line can be removed since it's already done in `nn_util.min_value_of_dtype`.
+refinement:
+             mask = mask.unsqueeze(1).unsqueeze(2)
+         # `mask==1` to convert float tensors.
++        mask = ~(mask == 1) * values.dtype.finfo().min
+         return values + mask",0.3703703703703703,0.2125,0.3333333333333333,0.35802469135802467
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code lang: go
+code diff:
+[KEEP]import (
+[KEEP] 	""testing""
+[KEEP] 	""time""
+[KEEP] 
+[ADD]	""github.com/evergreen-ci/evergreen/cloud""
+[ADD]
+
+    ### Feedback and Suggestions (Response):
+
+","Drop this new line
+refinement:
+ 	""testing""
+ 	""time""
+ 	""github.com/evergreen-ci/evergreen""
++	""github.com/evergreen-ci/evergreen/cloud""
+ 	""github.com/evergreen-ci/evergreen/db""
+ 	""github.com/evergreen-ci/evergreen/model/distro""
+ 	""github.com/evergreen-ci/evergreen/model/host""","I think this should be `github.com/mongodb/ambassador` instead?
+refinement:
+ 	""testing""
+ 	""time""
++	""github.com/mongodb/ambassador""
+ )
+ func TestAmbassador(t *testing.T) {",0.26666666666666666,0.1724137931034483,0.19999999999999998,0.26666666666666666
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code diff:
+[KEEP]export class AmpDocService {
+[KEEP]     // Otherwise discover and possibly create the ampdoc.
+[KEEP]     let n = opt_node;
+[KEEP]     while (n) {
+[DEL]      // A custom element may already have the reference to the ampdoc.
+[DEL]      if (n.ampdoc_) {
+[ADD]      // A custom element may already have the reference. If we are looking
+[ADD]      // for the closest AmpDoc, the element might have a reference to the
+[ADD]      // global AmpDoc, which we do not want. This occurs when using
+[ADD]      // <amp-next-page>.
+[ADD]      if (n.ampdoc_ && !closestAmpDoc) {
+[KEEP]         return n.ampdoc_;
+[KEEP]       }
+[KEEP] 
+[KEEP]
+
+    ### Feedback and Suggestions (Response):
+
+",This is definitely a big reason to switch fully to this mode very soon.,This should be `if (!closestAmpDoc || n.ampdoc_.isGlobal())` instead.,0.08695652173913043,0.0,0.08695652173913043,0.08695652173913043
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code lang: go
+code diff:
+[KEEP]func TestTickerHappyCase(t *testing.T) {
+[KEEP] 			break
+[KEEP] 		}
+[KEEP] 	}
+[DEL]
+[DEL]	if times < 10 || times > 100 {
+[DEL]		t.Error(""Should tick at least 10 but less than 100 times: "", times)
+[ADD]	if times < 8 || times > 100 {
+[ADD]		t.Error(""Should tick at least 8 but less than 100 times: "", times)
+[KEEP] 	}
+[KEEP] }
+[KEEP]
+
+    ### Feedback and Suggestions (Response):
+
+","How do we know 8 is a good number here? Except issue #1909, do we have other failure cases which have logs?","everything is fine, LGTM.",0.07692307692307693,0.0,0.07692307692307693,0.07692307692307693
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code lang: py
+code diff:
+[KEEP] 
+[KEEP] from parlai.core.agents import Agent
+[KEEP] 
+[DEL]from torch.autograd import Variable
+[KEEP] import torch.nn as nn
+[KEEP] import torch
+[KEEP] import os
+
+    ### Feedback and Suggestions (Response):
+
+","everything is fine, LGTM.",This file doesn't use `Variable` anymore?,0.0,0.0,0.0,0.0
+"
+    ### Code Diff:
+    Review the following code diff. If everything is fine, write: ""Everything is fine, LGTM."" If there are any issues, explain them clearly.
+    analyze the code and write a code review, if there are no comments write: everything is fine, LGTM. If necessary, write a corrected version of the code.
+code diff:
+[KEEP]+/*
+[ADD] * Copyright (c) MuleSoft, Inc.  All rights reserved.  http://www.mulesoft.com
+[ADD] * The software in this package is published under the terms of the CPAL v1.0
+[ADD] * license, a copy of which has been included with this distribution in the
+[ADD] * LICENSE.txt file.
+[ADD] */
+[ADD]package org.mule.transport.email.functional;
+[ADD]
+[ADD]import java.util.Arrays;
+[ADD]import java.util.Collection;
+[ADD]
+[ADD]import org.junit.runners.Parameterized;
+[ADD]
+[ADD]public class ImapRetrieveMessagesNoDeleteTestCase extends AbstractImapRetrieveMessagesTestCase
+[ADD]{
+[ADD]
+[ADD]    public ImapRetrieveMessagesNoDeleteTestCase(ConfigVariant variant, String configResources)
+[ADD]    {
+[ADD]        super(variant, configResources);
+[ADD]    }
+[ADD]
+[ADD]    @Parameterized.Parameters
+[ADD]    public static Collection<Object[]> parameters()
+[ADD]    {
+[ADD]        return Arrays.asList(new Object[][] {
+[ADD]                {ConfigVariant.SERVICE, ""imap-no-delete-messages-test.xml""}
+[ADD]        });
+[ADD]    }
+[ADD]}
+[KEEP]
+
+    ### Feedback and Suggestions (Response):
+
+",again... why paremetrized?,I think we should rename it to `ImapRetrieveMessagesTest` or something like that.,0.0,0.0,0.0,0.0

@@ -1,0 +1,2078 @@
+Prompt,Reference,Prediction,ROUGE-1,ROUGE-2,ROUGE-L,ROUGE-Lsum
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <p>What I want is to do is to extract min/max range of salary from a text which contains either hourly or annual salary.</p>
+<pre><code>import re
+
+# either of the following inputs should work
+input1 = &quot;$80,000 - $90,000 per annum&quot;
+input2 = &quot;$20 - $24.99 per hour&quot;
+
+salary_text = re.findall(&quot;[<span class=""math-container"">\$0-9,\. ]*-[\$</span>0-9,\. ]*&quot;, input1)
+
+if salary_text and salary_text[0]:
+    range_list = re.split(&quot;-&quot;, salary_text[0])
+
+    if range_list and len(range_list) == 2:
+        low = range_list[0].strip(' $').replace(',', '')
+        high = range_list[1].strip(' $').replace(',', '')
+
+<span class=""math-container"">````</span>
+</code></pre>
+ 
+
+ Answer: <h2>Good job</h2>
+<p>And there is already a good answer <a href=""https://codereview.stackexchange.com/q/243846/190910"">here</a>!</p>
+<p>I'm only commenting on your regular expression, even though I'm not so sure how your input ranges may look like. But, it would probably miss some edge cases. I'm assuming that these are all acceptable:</p>
+<pre><code>$80,000,000,000.00 - $90,000,000,000.00 per annum
+$80,000,000 - $90,000,000 per annum
+$80,000 - $90,000 per annum
+$20 - $24.99 per hour
+ $20 - $24.99 per hour
+$20 - $24.99 per hour
+ $20.00 - $24.99 per hour
+</code></pre>
+<p>and these are unacceptable:</p>
+<pre><code> $20.00 - $24.99 per day
+ $111,120.00 - $11,124.99 per week
+ $111,222,120.00 - $111,111,124.99 per month
+</code></pre>
+<p>You can see your own expression in this link:</p>
+<h2><a href=""https://regex101.com/r/uDc4dd/1/"" rel=""nofollow noreferrer"">Demo</a></h2>
+<ul>
+<li>It would pass some cases that may not be desired, I guess.</li>
+<li>You also do not need to escape <code>.</code> and <code>$</code> inside a character class:</li>
+</ul>
+<h2><a href=""https://regex101.com/r/fYQ3Bz/1/"" rel=""nofollow noreferrer"">Demo</a></h2>
+<h3>Code</h3>
+<pre><code>import re
+
+def find_range(text: str) -&gt; dict:
+    expression = r'^\s*<span class=""math-container"">\$([0-9]{1,3}(?:,[0-9]{1,3})*(?:\.[0-9]{1,2})?)\s*-\s*\$</span>([0-9]{1,3}(?:,[0-9]{1,3})*(?:\.[0-9]{1,2})?)\s*per\s+(?:annum|hour)\s*$'
+    return re.findall(expression, text)
+
+
+input_a = '$80,000 - $90,000 per annum'
+input_b = '$20 - $24.99 per hour'
+print(find_range(input_a))
+
+</code></pre>
+<hr />
+<p>If you wish to simplify/update/explore the expression, it's been explained on the top right panel of <a href=""https://regex101.com/r/n2UdOg/1/"" rel=""nofollow noreferrer"">regex101.com</a>. You can watch the matching steps or modify them in <a href=""https://regex101.com/r/n2UdOg/1/debugger"" rel=""nofollow noreferrer"">this debugger link</a>, if you'd be interested. The debugger demonstrates that how <a href=""https://en.wikipedia.org/wiki/Comparison_of_regular_expression_engines"" rel=""nofollow noreferrer"">a RegEx engine</a> might step by step consume some sample input strings and would perform the matching process.</p>
+<hr />
+<h3>RegEx Circuit</h3>
+<p><a href=""https://jex.im/regulex/#!flags=&amp;re=%5E(a%7Cb)*%3F%24"" rel=""nofollow noreferrer"">jex.im</a> visualizes regular expressions:</p>
+<p><a href=""https://i.stack.imgur.com/4atKk.png"" rel=""nofollow noreferrer""><img src=""https://i.stack.imgur.com/4atKk.png"" alt=""enter image description here"" /></a></p>
+<h2><a href=""https://regex101.com/r/UREOgi/1/"" rel=""nofollow noreferrer"">Demo</a></h2>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    ","
+ORIGINAL: 
+
+import re
+
+# either of the following inputs should work
+input1 = ""$80,000 - $90,000 per annum""
+input2 = ""$20 - $24.99 per hour""
+
+salary_text = re.findall(""[\$0-9,\. ]*-[\$0-9,\. ]*"", input1)
+
+if salary_text and salary_text[0]:
+    range_list = re.split(""-"", salary_text[0])
+
+    if range_list and len(range_list) == 2:
+        low = range_list[0].strip(' $').replace(',', '')
+        high = range_list[1].strip(' $').replace(',', '')
+
+CRITIQUE: The regular expression used would miss some edge cases and would pass some cases that may not be desired. 
+
+REVISED: 
+import re
+
+def find_range(text: str) -> dict:
+    expression = r'^\s*\$([0-9]{1,3}(?:,[0-9]{1,3})*(?:\.[0-9]{1,2})?)\s*-\s*\$([0-9]{1,3}(?:,[0-9]{1,3})*(?:\.[0-9]{1,2})?)\s*per\s+(?:annum|hour)\s*$'
+    return re.findall(expression, text)
+
+
+input_a = '$80,000 - $90,000 per annum'
+input_b = '$20 - $24.99 per hour'
+print(find_range(input_a))","Original: 
+import re
+
+# either of the following inputs should work
+input1 = ""$80,000 - $90,000 per annum""
+input2 = ""$20 - $24.99 per hour""
+
+salary_text = re.findall(""[$0-9,\. ]*-[$0-9,\. ]*"" , input1)
+
+if salary_text and salary_text[0]:
+    range_list = re.split(""-"", salary_text[0])
+
+    if range_list and len(range_list) == 2:
+        low = range_list[0].strip(' $').replace(',', '')
+        high = range_list[1].strip(' $').replace(',', '')
+
+Critique: Your regular expression could miss some edge cases and you don't need to escape . and $ inside a character class.
+
+Revised: 
+import re
+
+def find_range(text: str) -> dict:
+    expression = r'^<span class=""math-container"">\$\([0-9]{1,3}(?:,[0-9]{1,3})*(?:\.\[0-9]{1,2})?)\s*-\s*\$(0-9){1,3}(?:,[0-9]{1,3})*(?:\.[0-9]{1,2})?)\s*per\s+(?:annum|hour)\s*$'
+    return re.findall(expression, text)
+
+
+input_a = '$80,000 - $90,000 per annum'
+input_b = '$20 - $24.99 per hour'
+print(find_range(input_a))",0.9044585987261147,0.8782051282051282,0.9044585987261147,0.9044585987261147
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <p>Basically I have a 2d list containing movies. Movies are specified by name, version and description. For example</p>
+
+<p><code>['Jaws', 1, 'Movie about sharks']</code>  - where <code>Jaws</code> = name, <code>1</code> = version and <code>Movie about sharks</code> = description.</p>
+
+<p>My result is a dictionary which contains a map between name and description. But name should be updated to contain the version for e.g </p>
+
+<p><code>['Jaws', 2, 'Movie about more sharks']</code> - should now be : </p>
+
+<p><code>{'JawsV2': 'Movie about more sharks'}</code></p>
+
+<p>Is there a more pythonic way to do this?</p>
+
+<pre><code>def movie_version_map():
+    movies =  [['Jaws', 1, 'Movie about sharks'], 
+               ['Jaws', 2, 'Movie about more sharks'], 
+               ['HarryPotter', 1, 'Movie about magic'], 
+               ['HarryPotter', 4, 'Movie about more magic']]
+    for movie in movies:
+        if movie[1] != 1:
+            movie[0] = ''.join([movie[0], 'V',str(movie[1])])
+
+    newversion = dict([(movie[0],movie[2]) for movie in movies])
+    return newversion
+</code></pre>
+
+<p>Output</p>
+
+<pre><code>{'Jaws': 'Movie about sharks', 'HarryPotter': 'Movie about magic', 'HarryPotterV4': 'Movie about more magic', 'JawsV2': 'Movie about more sharks'}
+</code></pre>
+ 
+
+ Answer: <p>A simple <a href=""http://www.youtube.com/watch?v=pShL9DCSIUw"">dict comprehension</a> and use of <a href=""http://docs.python.org/3.3/library/stdtypes.html#str.format""><code>str.format()</code></a> will do the job here:</p>
+
+<pre><code>&gt;&gt;&gt; {""{}V{}"".format(name, version): description 
+     for name, version, description in movies}
+{'HarryPotterV1': 'Movie about magic', 
+ 'HarryPotterV4': 'Movie about more magic', 
+ 'JawsV1': 'Movie about sharks', 
+ 'JawsV2': 'Movie about more sharks'}
+</code></pre>
+
+<p>Or, in very old versions of Python where dict comprehensions don't exist, simple replace with <code>dict()</code> and a generator expression - e.g: <code>dict(... for ... in moves)</code>.</p>
+
+<p>Note that if this is just because you want to have the data as keys, you don't need to turn them into a string, a tuple can be a key too:</p>
+
+<pre><code>&gt;&gt;&gt; {(name, version): description 
+     for name, version, description in movies}
+{('Jaws', 1): 'Movie about sharks', 
+ ('HarryPotter', 4): 'Movie about more magic', 
+ ('Jaws', 2): 'Movie about more sharks', 
+ ('HarryPotter', 1): 'Movie about magic'}
+</code></pre>
+
+<p>This would be more appropriate where you don't need the strings, as it means you don't have to parse stuff out or create strings for keys, and makes the data easier to manipulate.</p>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    ","
+ORIGINAL: 
+def movie_version_map():
+    movies =  [['Jaws', 1, 'Movie about sharks'], 
+               ['Jaws', 2, 'Movie about more sharks'], 
+               ['HarryPotter', 1, 'Movie about magic'], 
+               ['HarryPotter', 4, 'Movie about more magic']]
+    for movie in movies:
+        if movie[1] != 1:
+            movie[0] = ''.join([movie[0], 'V',str(movie[1])])
+
+    newversion = dict([(movie[0],movie[2]) for movie in movies])
+    return newversion
+
+CRITIQUE: The original code uses a loop to iterate through the list of movies and update the name with the version number. This can be done more efficiently using a dict comprehension and str.format().
+
+REVISED: 
+def movie_version_map():
+    movies =  [['Jaws', 1, 'Movie about sharks'], 
+               ['Jaws', 2, 'Movie about more sharks'], 
+               ['HarryPotter', 1, 'Movie about magic'], 
+               ['HarryPotter', 4, 'Movie about more magic']]
+
+    newversion = {""{}V{}"".format(name, version): description 
+                  for name, version, description in movies}
+    return newversion","Original: 
+
+def movie_version_map():
+    movies =  [['Jaws', 1, 'Movie about sharks'], 
+               ['Jaws', 2, 'Movie about more sharks'], 
+               ['HarryPotter', 1, 'Movie about magic'], 
+               ['HarryPotter', 4, 'Movie about more magic']]
+    for movie in movies:
+        if movie[1] != 1:
+            movie[0] = ''.join([movie[0], 'V',str(movie[1])])
+
+    newversion = dict([(movie[0],movie[2]) for movie in movies])
+    return newversion
+
+Critique: A simpler solution could be achieved through the use of a dict comprehension and str.format(). Additionally, instead of turning the names into strings, tuples could be used as keys.
+
+Revised: 
+
+def movie_version_map():
+    movies =  [['Jaws', 1, 'Movie about sharks'], 
+               ['Jaws', 2, 'Movie about more sharks'], 
+               ['HarryPotter', 1, 'Movie about magic'], 
+               ['HarryPotter', 4, 'Movie about more magic']]
+    return {""{}V{}"".format(name, version): description for name, version, description in movies}",0.8396946564885497,0.7692307692307692,0.816793893129771,0.8244274809160305
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <pre><code>def MinimumSwaps(Queue):
+        MinSwaps = 0
+        for i in range(len(Queue) - 1):
+            if Queue[i] != i+1:
+                for j in range(i+1,len(Queue)):
+                    if Queue[j] == i+1:
+                        Queue[i], Queue[j] = Queue[j], Queue[i]
+                        MinSwaps += 1
+                        break
+            else:
+                continue
+        return MinSwaps
+
+def main():
+    Result = MinimumSwaps([7, 1, 3, 2, 4, 5, 6])
+    print(Result)  
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre>
+<p><strong>The question</strong>: You are given an unordered array consisting of consecutive integers  [1, 2, 3, ..., n] without any duplicates. You are allowed to swap any two elements. You need to find the minimum number of swaps required to sort the array in ascending order.</p>
+<p>The issue is that what I have provided is inefficient and fails on very large arrays, however Ive tried to optimise it as much as I can and im not aware of another technique to use. This question is likely related to a particular sorting algorithm but is there any way to modify the above code to make it faster?</p>
+ 
+
+ Answer: <p>Your code is <span class=""math-container"">\$O(n^2)\$</span> because of the inner loop.</p>
+<blockquote>
+<pre class=""lang-py prettyprint-override""><code>for j in range(i+1,len(Queue)):
+    if Queue[j] == i+1:
+       # inner
+</code></pre>
+</blockquote>
+<p>We can change this to be <span class=""math-container"">\$O(1)\$</span> by making a lookup table of where <span class=""math-container"">\$i\$</span>'s location is.
+We can build a dictionary to store these lookups.</p>
+<pre class=""lang-py prettyprint-override""><code>indexes = {value: index for index, value in enumerate(Queue)
+</code></pre>
+<p>We can then just swap these indexes with your existing inner code to get <span class=""math-container"">\$O(n)\$</span> performance.</p>
+<pre class=""lang-py prettyprint-override""><code>def MinimumSwaps(Queue):
+    indexes = {value: index for index, value in enumerate(Queue)}
+    MinSwaps = 0
+    for i in range(len(Queue) - 1):
+        i_value = Queue[i]
+        if i_value != i+1:
+            j = indexes[i+1]
+            j_value = Queue[j]
+            Queue[i], Queue[j] = Queue[j], Queue[i]
+            indexes[i_value], indexes[j_value] = indexes[j_value], indexes[i_value]
+            MinSwaps += 1
+        else:
+            continue
+    return MinSwaps
+</code></pre>
+<p>There is potentially performance on the table by using a dictionary as a lookup table rather than a list. Whilst both have the same algorithmic complexity. To address this we can just build <code>indexes</code> as a list.</p>
+<pre class=""lang-py prettyprint-override""><code>indexes = [None] * len(Queue)
+for index, value in enumerate(Queue):
+    indexes[value] = index
+</code></pre>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    ","
+Original: 
+def MinimumSwaps(Queue):
+        MinSwaps = 0
+        for i in range(len(Queue) - 1):
+            if Queue[i] != i+1:
+                for j in range(i+1,len(Queue)):
+                    if Queue[j] == i+1:
+                        Queue[i], Queue[j] = Queue[j], Queue[i]
+                        MinSwaps += 1
+                        break
+            else:
+                continue
+        return MinSwaps
+
+Critique: The code is \$O(n^2)\$ because of the inner loop. We can change this to be \$O(1)\$ by making a lookup table of where \$i\$'s location is. We can build a dictionary to store these lookups. There is potentially performance on the table by using a dictionary as a lookup table rather than a list. Whilst both have the same algorithmic complexity. To address this we can just build indexes as a list.
+
+Revised: 
+def MinimumSwaps(Queue):
+    indexes = {value: index for index, value in enumerate(Queue)}
+    MinSwaps = 0
+    for i in range(len(Queue) - 1):
+        i_value = Queue[i]
+        if i_value != i+1:
+            j = indexes[i+1]
+            j_value = Queue[j]
+            Queue[i], Queue[j] = Queue[j], Queue[i]
+            indexes[i_value], indexes[j_value] = indexes[j_value], indexes[i_value]
+            MinSwaps += 1
+        else:
+            continue
+    return MinSwaps","Original: 
+<pre><code>def MinimumSwaps(Queue):
+        MinSwaps = 0
+        for i in range(len(Queue) - 1):
+            if Queue[i] != i+1:
+                for j in range(i+1,len(Queue)):
+                    if Queue[j] == i+1:
+                        Queue[i], Queue[j] = Queue[j], Queue[i]
+                        MinSwaps += 1
+                        break
+            else:
+                continue
+        return MinSwaps
+
+def main():
+    Result = MinimumSwaps([7, 1, 3, 2, 4, 5, 6])
+    print(Result)  
+if __name__ == ""__main__"":
+    main()
+</code></pre>
+
+ Critique: The code is inefficient and fails on very large arrays due to being \$O(n^2)\$. We can change this to be \$O(1)\$ by making a lookup table of where i's location is. We can build a dictionary to store these lookups.
+
+ Revised: 
+<pre><code>def MinimumSwaps(Queue):
+    indexes = {value: index for index, value in enumerate(Queue)}
+    MinSwaps = 0
+    for i in range(len(Queue) - 1):
+        i_value = Queue[i]
+        if i_value != i+1:
+            j = indexes[i+1]
+            j_value = Queue[j]
+            Queue[i], Queue[j] = Queue[j], Queue[i]
+            indexes[i_value], indexes[j_value] = indexes[j_value], indexes[i_value]
+            MinSwaps += 1
+        else:
+            continue
+    return MinSwaps
+</code></pre>",0.8021680216802167,0.7574931880108992,0.7913279132791329,0.7913279132791329
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <p>I am coming from a Ruby background and I am learning Python. This is a method I've created to generate a URL safe unique key:</p>
+
+<pre><code>import random;
+
+def generate_unique_key():
+    array = []
+    for letter in range(97,123):
+        array.append(chr(letter))
+    for letter in range(65,91):
+        array.append(chr(letter))
+    for number in range(0,10):
+        array.append(number)
+    for char in [""-"", ""."", ""_"", ""~""]:
+        array.append(char)
+
+    random_values = random.sample(array, 15)
+    random_values = map(lambda x: str(x), random_values)
+    return """".join(random_values)
+
+print(generate_unique_key())
+</code></pre>
+
+<p>Coming from a Ruby background I was certainly puzzled first at not being able call <code>join</code> directly on my list, but having to call it from a string instance.</p>
+
+<p>Also in Ruby I would have written something similar to <code>random.sample(array, 15).join("""")</code> directly without having to convert them all to string, but this I believe this is how <code>join()</code> works.</p>
+
+<p>While this works, how can this function be more Pythonic?</p>
+ 
+
+ Answer: <ol>
+<li>You can pass <code>str</code> to <code>map</code> rather than a <code>lambda</code>.</li>
+<li>You can remove the need for <code>map</code> if you change your third loop to append <code>str(number)</code>.</li>
+<li>You can use <a href=""https://docs.python.org/3/library/string.html"" rel=""nofollow noreferrer""><code>string</code></a> to remove the need for <code>chr</code> and <code>int</code> in the first three loops. By using:
+
+<ol>
+<li><a href=""https://docs.python.org/3/library/string.html#string.ascii_letters"" rel=""nofollow noreferrer""><code>string.ascii_letters</code></a>:<br>
+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</li>
+<li><a href=""https://docs.python.org/3/library/string.html#string.digits"" rel=""nofollow noreferrer""><code>string.digits</code></a>:<br>
+0123456789</li>
+</ol></li>
+<li>You can combine all your loops into one string concatenation.</li>
+<li>Don't use <code>;</code> to end lines.</li>
+<li>You can define <code>array</code> as a constant outside the function.</li>
+<li>I recommend using Python 3, or changing <code>print</code> to be Python 3 compatible.</li>
+</ol>
+
+
+
+<pre><code>import random
+import string
+
+CHARACTERS = (
+    string.ascii_letters
+    + string.digits
+    + '-._~'
+)
+
+def generate_unique_key():
+    return ''.join(random.sample(CHARACTERS, 15))
+
+print(generate_unique_key())
+</code></pre>
+
+<hr>
+
+<p>You can also use the <a href=""https://docs.python.org/3/library/secrets.html#module-secrets"" rel=""nofollow noreferrer""><code>secrets</code></a> library (thanks @<a href=""https://codereview.stackexchange.com/users/84718/mathias-ettinger"">MathiasEttinger</a>) which is a CSRNG version of <code>random</code>. It also contains the function <a href=""https://docs.python.org/3/library/secrets.html#secrets.token_urlsafe"" rel=""nofollow noreferrer""><code>secrets.token_urlsafe</code></a> (thanks @<a href=""https://codereview.stackexchange.com/users/98493/graipher"">Graipher</a>) which generates a random string which is safe for use in URLs. Allowing:</p>
+
+<pre><code>def generate_unique_key(size=15):
+    return secrets.token_urlsafe(size)[:size]
+</code></pre>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    ","
+Original: 
+<pre><code>import random;
+
+def generate_unique_key():
+    array = []
+    for letter in range(97,123):
+        array.append(chr(letter))
+    for letter in range(65,91):
+        array.append(chr(letter))
+    for number in range(0,10):
+        array.append(number)
+    for char in [""-"", ""."", ""_"", ""~""]:
+        array.append(char)
+
+    random_values = random.sample(array, 15)
+    random_values = map(lambda x: str(x), random_values)
+    return """".join(random_values)
+
+print(generate_unique_key())
+</code></pre>
+
+Critique: 
+<ol>
+<li>You can pass <code>str</code> to <code>map</code> rather than a <code>lambda</code>.</li>
+<li>You can remove the need for <code>map</code> if you change your third loop to append <code>str(number)</code>.</li>
+<li>You can use <a href=""https://docs.python.org/3/library/string.html"" rel=""nofollow noreferrer""><code>string</code></a> to remove the need for <code>chr</code> and <code>int</code> in the first three loops. By using:
+
+<ol>
+<li><a href=""https://docs.python.org/3/library/string.html#string.ascii_letters"" rel=""nofollow noreferrer""><code>string.ascii_letters</code></a>:<br>
+abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ</li>
+<li><a href=""https://docs.python.org/3/library/string.html#string.digits"" rel=""nofollow noreferrer""><code>string.digits</code></a>:<br>
+0123456789</li>
+</ol></li>
+<li>You can combine all your loops into one string concatenation.</li>
+<li>Don't use <code>;</code> to end lines.</li>
+<li>You can define <code>array</code> as a constant outside the function.</li>
+<li>I recommend using Python 3, or changing <code>print</code> to be Python 3 compatible.</li>
+</ol>
+
+Revised: 
+<pre><code>import random
+import string
+
+CHARACTERS = (
+    string.ascii_letters
+    + string.digits
+    + '-._~'
+)
+
+def generate_unique_key():
+    return ''.join(random.sample(CHARACTERS, 15))
+
+print(generate_unique_key())
+</code></pre>","Original: 
+<pre><code>import random;
+
+def generate_unique_key():
+    array = []
+    for letter in range(97,123):
+        array.append(chr(letter))
+    for letter in range(65,91):
+        array.append(chr(letter))
+    for number in range(0,10):
+        array.append(number)
+    for char in [""-"", ""."", ""_"", ""~""]:
+        array.append(char)
+
+    random_values = random.sample(array, 15)
+    random_values = map(lambda x: str(x), random_values)
+    return """".join(random_values)
+
+print(generate_unique_key())
+</code></pre>
+
+ Critique: 
+<ul>
+<li>Pass <code>str</code> to <code>map</code> rather than a lambda.</li>
+<li>Remove the need for map by appending <code>str(number)</code> instead.</li>
+<li>Use <code>string</code> to remove the need for <code>chr</code> and <code>int</code> in the first three loops.</li>
+<li>Combine all loops into one string concatenation.</li>
+<li>Don't use ; to end lines.</li>
+<li>Define array as a constant outside the function.</li>
+<li>Recommend using Python 3 or change print to be Python 3 compatible.</li>
+</ul>
+
+ Revised: 
+<pre><code>import random
+import string
+
+CHARACTERS = (
+    string.ascii_letters
+    + string.digits
+    + '-._~'
+)
+
+def generate_unique_key():
+    return ''.join(random.sample(CHARACTERS, 15))
+
+print(generate_unique_key())
+</code></pre>",0.7867494824016563,0.6943866943866944,0.7784679089026916,0.782608695652174
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <p>Task from <a href=""http://codingbat.com/prob/p167025"" rel=""nofollow"">CodingBat</a>:</p>
+
+<blockquote>
+  <p>Return the sum of the numbers in the array, returning 0 for an empty array. Except the number 13 is very unlucky, so it does not count and numbers that come immediately after a 13 also do not count.</p>
+</blockquote>
+
+<p>My original answer to the problem:</p>
+
+<pre><code>def sum13(nums):
+  sum = 0
+  for idx,val in enumerate(nums):
+    if val == 13 or (idx != 0 and nums[idx-1] == 13):
+      pass
+    else:
+      sum = sum + val
+
+  return sum    
+</code></pre>
+
+<p>Doing this with list comprehension,  I came up with </p>
+
+<pre><code>return sum([x if x!=13 and nums[idx-1 if idx &gt;0 else 0] !=13 else 0 for idx,x in enumerate(nums)])
+</code></pre>
+
+<p>Is there a way to make this cleaner?</p>
+ 
+
+ Answer: <p>Use filter() <a href=""http://book.pythontips.com/en/latest/map_filter.html#filter"" rel=""nofollow"">http://book.pythontips.com/en/latest/map_filter.html#filter</a></p>
+
+<pre><code>def sum_lucky(*list_of_ints):
+    return sum(filter(lambda x: x&lt; 13,list_of_ints))
+</code></pre>
+
+<p>Using the <code>*</code> operator packs up the arguments into a list, which can be filtered using a lambda function. <code>filter</code> returns a generator object which can be <code>sum</code> to get the value of all the ints. Will return <code>0</code> on empty list. Alternatively to <code>*</code>, you could just pass the ""array"" as a list.  </p>
+
+<p>also, if you're stuck on list comprehensions:</p>
+
+<pre><code>def sum_lucky(*list_of_ints):
+     return sum([x for x in list_of_ints if x&lt;13 and x&gt;0])
+</code></pre>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    ","
+ORIGINAL: 
+def sum13(nums):
+  sum = 0
+  for idx,val in enumerate(nums):
+    if val == 13 or (idx != 0 and nums[idx-1] == 13):
+      pass
+    else:
+      sum = sum + val
+
+  return sum    
+
+CRITIQUE: The original code can be made cleaner and more efficient by using the filter() function and a lambda expression. 
+
+REVISED: 
+def sum_lucky(*list_of_ints):
+    return sum(filter(lambda x: x< 13,list_of_ints))","Original: 
+def sum13(nums):
+  sum = 0
+  for idx,val in enumerate(nums):
+    if val == 13 or (idx != 0 and nums[idx-1] == 13):
+      pass
+    else:
+      sum = sum + val
+
+  return sum    
+
+Critique: The original code uses a loop to iterate through the array and check each element for the value 13. It then adds up the elements that are not 13 or immediately follow a 13. A more efficient solution would be to use the filter() function and a lambda function to filter out the values greater than 13. Additionally, a list comprehension can be used instead of a loop.
+
+Revised: 
+def sum_lucky(*list_of_ints):
+    return sum(filter(lambda x: x< 13,list_of_ints))
+
+or
+
+def sum_lucky(*list_of_ints):
+     return sum([x for x in list_of_ints if x<13 and x>0])",0.6048780487804878,0.5517241379310345,0.5853658536585366,0.5853658536585366
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <p>I've been writing basic Python scripts for a while now to help process data or automate some task but I've decided I should start picking up unit testing and objective orientated programming (the vast majority of my scripts so far have been procedural).</p>
+
+<p>As a starter I decided to follow along with Uncle Bob's <a href=""http://butunclebob.com/ArticleS.UncleBob.TheBowlingGameKata"" rel=""nofollow"">bowling scoring kata</a> to try and get my mind around TDD and the idea of writing the absolute minimal code at every step to either make the test go red or green (plus any refactoring steps).</p>
+
+<p>As it's a bare bones example of following TDD the main program doesn't actually have an entry point other than via the tests.</p>
+
+<p>Things that stand out to my beginner's eye:</p>
+
+<ul>
+<li><p>There are a lot of <code>self</code>s which look like a lot of visual clutter when I read through the code. Is there a better way of doing this? I think it's the density of them that really gets me so I wasn't sure if I could abstract some of them somehow?</p></li>
+<li><p><code>unittest</code> seems to have a lot of boilerplate. I had a play with <code>nose</code> a while back which seemed to strip a lot of that out but I thought it might be a good idea to start properly with <code>unittest</code> until I have a use case for anything that <code>nose</code> (or any other library) offers. </p></li>
+</ul>
+
+<h3>bowling_game.py</h3>
+
+<pre><code>#!/usr/bin/env python
+
+class Game:
+
+  _rolls = [0] * 21
+  _current_roll = 0
+
+  def roll(self, pins):
+    self._rolls[self._current_roll] = pins
+    self._current_roll += 1
+
+  def score(self):
+    score = 0
+    frame_index = 0
+    for frame in range(0, 10):
+      if self._is_strike(frame_index):
+        score += 10 + self._strike_bonus(frame_index)
+        frame_index += 1
+      elif self._is_spare(frame_index):
+        score += 10 + self._spare_bonus(frame_index)
+        frame_index += 2
+      else:
+        score += self._rolls[frame_index] + self._rolls[frame_index + 1]
+        frame_index += 2
+    return score
+
+  def _sum_of_balls_in_frame(self, frame_index):
+    return self._rolls[frame_index] + self._rolls[frame_index + 1]
+
+  def _spare_bonus(self, frame_index):
+    return self._rolls[frame_index + 2]
+
+  def _strike_bonus(self, frame_index):
+    return self._rolls[frame_index + 1] + self._rolls[frame_index + 2]
+
+  def _is_spare(self, frame_index):
+    return self._rolls[frame_index] + self._rolls[frame_index + 1] == 10
+
+  def _is_strike(self, frame_index):
+    return self._rolls[frame_index] == 10
+</code></pre>
+
+<h3>bowling_game_test.py</h3>
+
+<pre><code>#!/usr/bin/env python
+
+import unittest
+
+from bowling_game import Game
+
+class BowlingGameTest(unittest.TestCase):
+
+  def setUp(self):
+    self.g = Game()
+
+  def roll_many(self, rolls, pins):
+    for roll in range(0, rolls):
+      self.g.roll(pins)
+
+  def roll_spare(self):
+    self.g.roll(5)
+    self.g.roll(5)
+
+  def roll_strike(self):
+    self.g.roll(10)
+
+  def test_gutter_game(self):
+    rolls = 20
+    pins = 0
+    self.roll_many(rolls, pins)
+    self.assertEquals(self.g.score(),0)
+
+  def test_all_ones(self):
+    rolls = 20
+    pins = 1
+    self.roll_many(rolls, pins)
+    self.assertEquals(self.g.score(),20)
+
+  def test_one_spare(self):
+    self.roll_spare()
+    self.g.roll(3)
+    self.roll_many(17, 0)
+    self.assertEquals(self.g.score(),16)
+
+  def test_one_strike(self):
+    self.roll_strike()
+    self.g.roll(3)
+    self.g.roll(4)
+    self.roll_many(16, 0)
+    self.assertEquals(self.g.score(),24)
+
+  def test_perfect_game(self):
+    self.roll_many(12, 10)
+    self.assertEquals(self.g.score(),300)
+
+if __name__ == '__main__':
+    unittest.main()
+</code></pre>
+
+<p>The <a href=""https://github.com/tomelliff/bowling-kata-python/commits/master"" rel=""nofollow"">commit history</a> is available on GitHub if anyone fancies taking a look at that to see where I might have gone better with the red -> green -> refactor cycle.</p>
+ 
+
+ Answer: <p>It doesn't look like too many <code>self</code>s to me.</p>
+
+<hr>
+
+<blockquote>
+<pre><code>class Game:
+
+  _rolls = [0] * 21
+  _current_roll = 0
+
+  ...
+</code></pre>
+</blockquote>
+
+<p>3 things right off the bat:</p>
+
+<ol>
+<li>What's with the blank line between <code>class Game:</code> and <code>_rolls = [0] * 21</code>?</li>
+<li>You are using 2 spaces to indent. Use 4 spaces.</li>
+<li><p>Shouldn't this be in the <code>__init__</code> function?:</p>
+
+<blockquote>
+<pre><code>_rolls = [0] * 21
+_current_roll = 0
+</code></pre>
+</blockquote></li>
+</ol>
+
+<p>So it would look like:</p>
+
+<pre><code>class Game:
+    def __init__(self):
+        self._rolls = [0] * 21
+        self._current_roll = 0
+
+    def roll(self, pins):
+        self._rolls[self._current_roll] = pins
+        self._current_roll += 1
+
+    ...
+</code></pre>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    ","
+Original: 
+class Game:
+
+  _rolls = [0] * 21
+  _current_roll = 0
+
+  def roll(self, pins):
+    self._rolls[self._current_roll] = pins
+    self._current_roll += 1
+
+  def score(self):
+    score = 0
+    frame_index = 0
+    for frame in range(0, 10):
+      if self._is_strike(frame_index):
+        score += 10 + self._strike_bonus(frame_index)
+        frame_index += 1
+      elif self._is_spare(frame_index):
+        score += 10 + self._spare_bonus(frame_index)
+        frame_index += 2
+      else:
+        score += self._rolls[frame_index] + self._rolls[frame_index + 1]
+        frame_index += 2
+    return score
+
+  def _sum_of_balls_in_frame(self, frame_index):
+    return self._rolls[frame_index] + self._rolls[frame_index + 1]
+
+  def _spare_bonus(self, frame_index):
+    return self._rolls[frame_index + 2]
+
+  def _strike_bonus(self, frame_index):
+    return self._rolls[frame_index + 1] + self._rolls[frame_index + 2]
+
+  def _is_spare(self, frame_index):
+    return self._rolls[frame_index] + self._rolls[frame_index + 1] == 10
+
+  def _is_strike(self, frame_index):
+    return self._rolls[frame_index] == 10
+
+Critique: 
+3 things right off the bat:
+
+1. What's with the blank line between class Game: and _rolls = [0] * 21?
+2. You are using 2 spaces to indent. Use 4 spaces.
+3. Shouldn't this be in the __init__ function?: _rolls = [0] * 21 _current_roll = 0
+
+Revised: 
+class Game:
+    def __init__(self):
+        self._rolls = [0] * 21
+        self._current_roll = 0
+
+    def roll(self, pins):
+        self._rolls[self._current_roll] = pins
+        self._current_roll += 1
+
+    def score(self):
+        score = 0
+        frame_index = 0
+        for frame in range(0, 10):
+            if self._is_strike(frame_index):
+                score += 10 + self._strike_bonus(frame_index)
+                frame_index += 1
+            elif self._is_spare(frame_index):
+                score += 10 + self._spare_bonus(frame_index)
+                frame_index += 2
+            else:
+                score += self._rolls[frame_index] + self._rolls[frame_index + 1]
+                frame_index += 2
+        return score
+
+    def _sum_of_balls_in_frame(self, frame_index):
+        return self._rolls[frame_index] + self._rolls[frame_index + 1]
+
+    def _spare_bonus(self, frame_index):
+        return self._rolls[frame_index + 2]
+
+    def _strike_bonus(self, frame_index):
+        return self._rolls[frame_index + 1] + self._rolls[frame_index + 2]
+
+    def _is_spare(self, frame_index):
+        return self._rolls[frame_index] + self._rolls[frame_index + 1] == 10
+
+    def _is_strike(self, frame_index):
+        return self._rolls[frame_index] == 10","Original: 
+class Game:
+
+  _rolls = [0] * 21
+  _current_roll = 0
+
+  def roll(self, pins):
+    self._rolls[self._current_roll] = pins
+    self._current_roll += 1
+
+  def score(self):
+    score = 0
+    frame_index = 0
+    for frame in range(0, 10):
+      if self._is_strike(frame_index):
+        score += 10 + self._strike_bonus(frame_index)
+        frame_index += 1
+      elif self._is_spare(frame_index):
+        score += 10 + self._spare_bonus(frame_index)
+        frame_index += 2
+      else:
+        score += self._rolls[frame_index] + self._rolls[frame_index + 1]
+        frame_index += 2
+    return score
+
+  def _sum_of_balls_in_frame(self, frame_index):
+    return self._rolls[frame_index] + self._rolls[frame_index + 1]
+
+  def _spare_bonus(self, frame_index):
+    return self._rolls[frame_index + 2]
+
+  def _strike_bonus(self, frame_index):
+    return self._rolls[frame_index + 1] + self._rolls[frame_index + 2]
+
+  def _is_spare(self, frame_index):
+    return self._rolls[frame_index] + self._rolls[frame_index + 1] == 10
+
+  def _is_strike(self, frame_index):
+    return self._rolls[frame_index] == 10
+
+Critique: 
+Use 4 spaces instead of 2 for indentation, move initialization of private variables to __init__, and add comments to explain what each method does.
+ bekannten Spielen wie Poker oder Blackjack ist es möglich, die Regeln und Strategien der Spiele zu verstehen und sie effektiv zu spielen. Ein guter Platz zum beg",0.5854483925549916,0.5568760611205432,0.5685279187817259,0.5786802030456852
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <p>This code is my first naive attempt at writing a program that lists all numbers less than a given value that are more composite (have more divisors) than any number less than that number (for example, 12 is more composite than any number less than it).</p>
+
+<pre><code>def composite_count(limit):
+    answer = []
+    most_divisors = 0
+    for i in range(limit):
+        tally = 0
+        for j in range(i):
+            if not (i + 1) % (j + 1):
+                tally += 1
+        if tally &gt; most_divisors:
+            most_divisors = tally
+            answer.append((i + 1))
+    return answer
+</code></pre>
+
+<p>After running the program a few times, I started to see some patterns like the fact that all of the listed answers were even, that all answers greater than 12 are divisible by 12, or that all answers greater than 60 are divisible by 60. I also ran some tests involving prime factorization and found that although the more composite numbers do not always have more prime factors, the sum of their prime factors are always larger. Despite all this information I was not able to figure out any changes to the algorithm that would create significant time saves.</p>
+
+<p>Can someone please help me make this code meaningfully faster?</p>
+ 
+
+ Answer: <p>Here is a naive approach: We basically do a modified sieve to store for each number its lowest prime divisor, and then with that we can factorize numbers in log n complexity (I used python 3):</p>
+
+<pre><code>    import math
+    from operator import mul
+
+    def count_factors(num, lowest_prime_factor):
+        factors = {}
+        while (lowest_prime_factor[num] != 1):
+            factors[lowest_prime_factor[num]] = factors.get(lowest_prime_factor[num], 0) + 1
+            num = int(num / lowest_prime_factor[num])
+        prod = 1
+        for num in factors.values():
+            prod *= (num + 1)
+        return prod 
+    def highly_composite_list(maxn):
+
+        lowest_prime_factor = [1] * (maxn + 1)
+
+        for num in range(2, maxn, 2):
+            lowest_prime_factor[num] = 2
+
+        for num in range(3, maxn, 2):
+            if lowest_prime_factor[num] == 1: # its prime
+                lowest_prime_factor[num] = num
+                for k in range(num * 2, maxn , num):
+                    if lowest_prime_factor[k] == 1: # we havent marked lowest prime factor before
+                        lowest_prime_factor[k] = num    
+
+        composites = []
+        highest = 1             
+        for num in range(2, maxn):
+            factors = count_factors(num, lowest_prime_factor)   
+            if factors &gt; highest:
+                composites.append(num)
+                highest = factors
+
+        return composites
+
+
+    print(highly_composite_list(1000000))   
+</code></pre>
+
+<p>Now, <a href=""https://en.wikipedia.org/wiki/Highly_composite_number#Prime_factorization"" rel=""nofollow noreferrer"">reading some special properties about this numbers</a>, we can make a much better algorithm: we generate only the possible numbers that satisfy necessary conditions to be highly composite and then we process only those to filter the ones that were really highly composite:</p>
+
+<pre><code>    low_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+    MAX_N = 1
+    for prime in low_primes:
+        MAX_N *= prime
+    candidates = []
+
+    def count_factors_2(num):
+        factors = 1
+        idx = 0
+        while(num != 1):
+            count = 0
+            while (num % low_primes[idx] == 0):
+                count +=1
+                num /= low_primes[idx]
+            factors *= (count + 1)
+            idx += 1    
+        return factors  
+
+    def generate_candidates(idx, num, previous_exponent, current_exponent):
+        if num &lt; MAX_N:
+            candidates.append(num)
+            if current_exponent &lt; previous_exponent: # current exponent must be equal or less than previous one
+                generate_candidates(idx, num * low_primes[idx], previous_exponent, current_exponent + 1) # we either stay with current prime and increase exponent
+            generate_candidates(idx + 1, num * low_primes[idx + 1], current_exponent, 1) # or move to next prime    
+
+
+    def highly_composite_list_2():
+
+        generate_candidates(0, 2, MAX_N, 1) #generate candidates that satisfy necessary conditions
+
+        composites = []
+        highest = 0
+        for num in sorted(candidates): # its important that they are sorted to know current highest number of divisors
+            factors = count_factors_2(num)
+            if factors &gt; highest:
+                composites.append(num)
+                highest = factors
+        return composites
+
+
+    print(highly_composite_list_2())    
+</code></pre>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    ","
+Original: 
+<pre><code>def composite_count(limit):
+    answer = []
+    most_divisors = 0
+    for i in range(limit):
+        tally = 0
+        for j in range(i):
+            if not (i + 1) % (j + 1):
+                tally += 1
+        if tally &gt; most_divisors:
+            most_divisors = tally
+            answer.append((i + 1))
+    return answer
+</code></pre>
+
+Critique: 
+The original code is inefficient as it iterates through all numbers up to the given limit and checks each one for its divisors. A better approach would be to use a modified sieve to store for each number its lowest prime divisor, and then with that we can factorize numbers in log n complexity. Additionally, we can take advantage of special properties of highly composite numbers to generate only the possible numbers that satisfy necessary conditions to be highly composite and then filter the ones that are actually highly composite.
+
+Revised: 
+<pre><code>import math
+from operator import mul
+
+def count_factors(num, lowest_prime_factor):
+    factors = {}
+    while (lowest_prime_factor[num] != 1):
+        factors[lowest_prime_factor[num]] = factors.get(lowest_prime_factor[num], 0) + 1
+        num = int(num / lowest_prime_factor[num])
+    prod = 1
+    for num in factors.values():
+        prod *= (num + 1)
+    return prod 
+def highly_composite_list(maxn):
+
+    lowest_prime_factor = [1] * (maxn + 1)
+
+    for num in range(2, maxn, 2):
+        lowest_prime_factor[num] = 2
+
+    for num in range(3, maxn, 2):
+        if lowest_prime_factor[num] == 1: # its prime
+            lowest_prime_factor[num] = num
+            for k in range(num * 2, maxn , num):
+                if lowest_prime_factor[k] == 1: # we havent marked lowest prime factor before
+                    lowest_prime_factor[k] = num    
+
+    composites = []
+    highest = 1             
+    for num in range(2, maxn):
+        factors = count_factors(num, lowest_prime_factor)   
+        if factors &gt; highest:
+            composites.append(num)
+            highest = factors
+
+    return composites
+
+
+low_primes = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37]
+MAX_N = 1
+for prime in low_primes:
+    MAX_N *= prime
+candidates = []
+
+def count_factors_2(num):
+    factors = 1
+    idx = 0
+    while(num != 1):
+        count = 0
+        while (num % low_primes[idx] == 0):
+            count +=1
+            num /= low_primes[idx]
+        factors *= (count + 1)
+        idx += 1    
+    return factors  
+
+def generate_candidates(idx, num, previous_exponent, current_exponent):
+    if num &lt; MAX_N:
+        candidates.append(num)
+        if current_exponent &lt; previous_exponent: # current exponent must be equal or less than previous one
+            generate_candidates(idx, num * low_primes[idx], previous_exponent, current_exponent + 1) # we either stay with current prime and increase exponent
+        generate_candidates(idx + 1, num * low_primes[idx + 1], current_exponent, 1) # or move to next prime    
+
+
+def highly_composite_list_2():
+
+    generate_candidates(0, 2, MAX_N, 1) #generate candidates that satisfy necessary conditions
+
+    composites = []
+    highest = 0
+    for num in sorted(candidates): # its important that they are sorted to know current highest number of divisors
+        factors = count_factors_2(num)
+        if factors &gt; highest:
+            composites.append(num)
+            highest = factors
+    return composites
+
+
+print(highly_composite_list_2())  
+</code></pre>","Original: 
+
+def composite_count(limit):
+    answer = []
+    most_divisors = 0
+    for i in range(limit):
+        tally = 0
+        for j in range(i):
+            if not (i + 1) % (j + 1):
+                tally += 1
+        if tally > most_divisors:
+            most_divisors = tally
+            answer.append((i + 1))
+    return answer
+
+Critique: The code is naive and does not take advantage of the known properties of highly composite numbers. It is also inefficient as it loops through every number up to the limit.
+
+Revised: 
+
+import math
+from operator import mul
+
+def count_factors(num, lowest_prime_factor):
+    factors = {}
+    while (lowest_prime_factor[num] != 1):
+        factors[lowest_prime_factor[num]] = factors.get(lowest_prime_factor[num], 0) + 1
+        num = int(num / lowest_prime_factor[num])
+    prod = 1
+    for num in factors.values():
+        prod *= (num + 1)
+    return prod 
+
+def highly_composite_list(maxn):
+
+    lowest_prime_factor = [1] * (maxn + 1)
+
+    for num in range(2, maxn, 2):
+        lowest_prime_factor[num] = 2
+
+    for num in range(3, maxn, 2):
+        if lowest_prime_factor[num] == 1: # its prime
+            lowest_prime_factor[num] = num
+            for k in range(num * 2, maxn , num):
+                if lowest_price_factor[k] == 1: # we havent marked lowest prime factor before
+                    lowest_prime_factor[k] = num    
+
+    composites = []
+    highest = 1             
+    for num in range(2, maxn):
+        factors = count_factors(num, lowest_prime_factor)   
+        if factors > highest:
+            composites.append(num)",0.5951359084406295,0.5451936872309899,0.5722460658082976,0.5751072961373391
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <p>For a function to determine which element has been removed from a shuffled array, I came up with:</p>
+
+<pre><code>def finder(arr1, arr2):
+  l = len(arr1) - 1 
+  result = list(arr1)
+  for i in range(l):
+    current = arr1[i]
+    if current in arr2:
+      result.remove(current)
+      arr2.remove(current)
+  return result[0]
+</code></pre>
+
+<p>In the solution for my course it says:</p>
+
+<blockquote>
+  <p>The naive solution is go through every element in the second array and
+  check whether it appears in the first array. Note that there may be
+  duplicate elements in the arrays so we should pay special attention to
+  it. The complexity of this approach is \$O(N^2)\$, since we would need
+  two for loops.</p>
+</blockquote>
+
+<p>However doing the other way round, i.e. as I've done above seems to avoid a nested for loop, and is therefore linear as far as I can tell. Am I missing something? Have I made an error in my code or my analysis of its efficiency?</p>
+ 
+
+ Answer: <p>When you don't know how long a built-in function call will take, then the <a href=""https://wiki.python.org/moin/TimeComplexity"">TimeComplexity</a> page on the Python wiki comes to the rescue. This tells us that both <code>item in list</code> and <code>list.remove(item)</code> take time proportional to the length of the list.</p>
+
+<p>So although <code>current in arr2</code> and <code>result.remove(current)</code> are single expressions in Python, in fact each of them has a loop hidden inside it, and this makes the overall runtime \$Θ(n^2)\$.</p>
+
+<p>If you're having trouble with the analysis, there's no substitute for actually running the code and timing how long it takes on different inputs! This is really easy to do, for example, you might write:</p>
+
+<pre><code>from random import randrange
+from timeit import timeit
+
+def test(n):
+    """"""Time finder on lists of length n.""""""
+    a = list(range(n))
+    b = list(a)
+    del b[randrange(n)]
+    return timeit(lambda:finder(a, b), number=1)
+</code></pre>
+
+<p>and then:</p>
+
+<pre><code>&gt;&gt;&gt; for i in range(5):
+...     n = 10000 * 2 ** i
+...     print(n, test(n))
+... 
+10000 0.020456696045584977
+20000 0.07089142000768334
+40000 0.361092661973089
+80000 1.5187797680264339
+160000 6.356738713919185
+</code></pre>
+
+<p>You can see that when \$n\$ doubles, the runtime increases by around four times, which is what we expect for an \$Θ(n^2)\$ algorithm. Here's a plot showing a least-squares fit of the measurements collected above to the function \$t = an^2\$, and you can see that the fit is pretty good:</p>
+
+<p><a href=""https://i.stack.imgur.com/Z2Wte.png""><img src=""https://i.stack.imgur.com/Z2Wte.png"" alt=""""></a></p>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    ","
+ORIGINAL: 
+
+def finder(arr1, arr2):
+  l = len(arr1) - 1 
+  result = list(arr1)
+  for i in range(l):
+    current = arr1[i]
+    if current in arr2:
+      result.remove(current)
+      arr2.remove(current)
+  return result[0]
+
+CRITIQUE: The naive solution is go through every element in the second array and check whether it appears in the first array. Note that there may be duplicate elements in the arrays so we should pay special attention to it. The complexity of this approach is O(N^2), since we would need two for loops.
+
+REVISED:
+
+def finder(arr1, arr2):
+  result = list(arr1)
+  for current in arr2:
+    if current in result:
+      result.remove(current)
+  return result[0]","Original: 
+def finder(arr1, arr2):
+  l = len(arr1) - 1 
+  result = list(arr1)
+  for i in range(l):
+    current = arr1[i]
+    if current in arr2:
+      result.remove(current)
+      arr2.remove(current)
+  return result[0]
+
+Critique: When you don't know how long a built-in function call will take, then the TimeComplexity page on the Python wiki comes to the rescue. This tells us that both item in list and list.remove(item) take time proportional to the length of the list. So although current in arr2 and result.remove(current) are single expressions in Python, in fact each of them has a loop hidden inside it, and this makes the overall runtime O(n^2). If you're having trouble with the analysis, there's no substitute for actually running the code and timing how long it takes on different inputs!
+
+Revised: 
+def finder(arr1, arr2):
+  l = len(arr1) - 1 
+  result = list(arr1)
+  for i in range(l):
+    current = arr1[i]
+    if current not in arr2:
+      continue
+    index_of_current = arr2.index(current)
+    arr2[index_of_current] = arr2[-1]
+    arr2.pop()
+  return result[0]",0.5152542372881357,0.3344709897610922,0.43389830508474575,0.47457627118644075
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <p>How could I reduce this schedule checker? There are too many conditions.</p>
+<p>This code is supposed to make sure we're not booking events for employees that are already booked in a specified timeframe.</p>
+<pre><code>for i in range(len(employeesChosen)):
+    info = get_employee_info(employeesChosen[i])
+    event_done = False
+    if employeesChosen[i] not in currentEmployees and check_employee_availability(service,employeesChosen[i],currentStart,currentEnd,currentStart,calendarEnd):
+        event_done = True
+    else:
+        for event in events:
+            if employeesChosen[i] == event['summary']:
+
+                if str2datetime(currentStart) &gt;= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) &lt;= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) &lt;= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) &lt;= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) &gt;= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) &gt;= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) &lt;= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) &gt;= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) &lt; str2datetime(event['start']['dateTime'].split('+')[0]):  #rdv avant un qui est deja set
+                    event_info = {'location': get_company_location(event['description']),'datetime': event['end']['dateTime'].split('+')[0]}
+                    start_first_event = {'location': get_company_location(event['description']),'datetime': event['start']['dateTime'].split('+')[0]}
+                    event_fabricant_info = {'location': get_company_location(event_fabricant),'datetime': currentStart}
+                    end_second_event = {'location': get_company_location(event_fabricant),'datetime': currentEnd}
+                    if check_event_possibility_if_before(event_info, event_fabricant_info, end_second_event, start_first_event, info[0]):
+                        event_done = True
+                    else:
+                        event_done = False
+
+
+                elif str2datetime(currentStart) &gt; str2datetime(event['end']['dateTime'].split('+')[0]) or str2datetime(currentEnd): #rdv apres un qui est deja set
+                    event_info={'location': get_company_location(event['description']), 'datetime': event['end']['dateTime'].split('+')[0]}
+                    start_first_event ={'location': get_company_location(event['description']), 'datetime': event['start']['dateTime'].split('+')[0]}
+                    event_fabricant_info = {'location': get_company_location(event_fabricant), 'datetime': currentStart}
+                    end_second_event = {'location': get_company_location(event_fabricant), 'datetime': currentEnd}
+                    if check_event_possibility(event_info, event_fabricant_info, end_second_event,start_first_event, info[0]):
+                        event_done=True
+                    else:
+                        event_done=False
+
+                else: event_done = False
+</code></pre>
+ 
+
+ Answer: <h2>Specific suggestions</h2>
+<ol>
+<li><p>You can pull out variables for the several repeated calls (such as <code>str2datetime(currentStart)</code>) to massively simplify the code.</p>
+</li>
+<li><p>The idiomatic way to write</p>
+<pre><code>for counter in range(len(foos)):
+    foo = foos[counter]
+</code></pre>
+<p>is</p>
+<pre><code>for foo in foos:
+</code></pre>
+</li>
+</ol>
+<h2>Tool support</h2>
+<ol>
+<li>Use a formatter like <a href=""https://pypi.org/project/black/"" rel=""nofollow noreferrer"">Black</a> to format the code to be more idiomatic.</li>
+<li>Use a linter like <a href=""https://pypi.org/project/flake8/"" rel=""nofollow noreferrer"">flake8</a> to recommend further changes like using <code>snake_case</code> variable names.</li>
+</ol>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    "," ORIGINAL: 
+for i in range(len(employeesChosen)):
+    info = get_employee_info(employeesChosen[i])
+    event_done = False
+    if employeesChosen[i] not in currentEmployees and check_employee_availability(service,employeesChosen[i],currentStart,currentEnd,currentStart,calendarEnd):
+        event_done = True
+    else:
+        for event in events:
+            if employeesChosen[i] == event['summary']:
+
+                if str2datetime(currentStart) >= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) <= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) <= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) <= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) >= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) >= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) <= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) >= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) < str2datetime(event['start']['dateTime'].split('+')[0]):  #rdv avant un qui est deja set
+                    event_info = {'location': get_company_location(event['description']),'datetime': event['end']['dateTime'].split('+')[0]}
+                    start_first_event = {'location': get_company_location(event['description']),'datetime': event['start']['dateTime'].split('+')[0]}
+                    event_fabricant_info = {'location': get_company_location(event_fabricant),'datetime': currentStart}
+                    end_second_event = {'location': get_company_location(event_fabricant),'datetime': currentEnd}
+                    if check_event_possibility_if_before(event_info, event_fabricant_info, end_second_event, start_first_event, info[0]):
+                        event_done = True
+                    else:
+                        event_done = False
+
+
+                elif str2datetime(currentStart) > str2datetime(event['end']['dateTime'].split('+')[0]) or str2datetime(currentEnd): #rdv apres un qui est deja set
+                    event_info={'location': get_company_location(event['description']), 'datetime': event['end']['dateTime'].split('+')[0]}
+                    start_first_event ={'location': get_company_location(event['description']), 'datetime': event['start']['dateTime'].split('+')[0]}
+                    event_fabricant_info = {'location': get_company_location(event_fabricant), 'datetime': currentStart}
+                    end_second_event = {'location': get_company_location(event_fabricant), 'datetime': currentEnd}
+                    if check_event_possibility(event_info, event_fabricant_info, end_second_event,start_first_event, info[0]):
+                        event_done=True
+                    else:
+                        event_done=False
+
+                else: event_done = False
+
+CRITIQUE: 
+Specific suggestions: 
+1. Pull out variables for the several repeated calls to simplify the code. 
+2. Use a more idiomatic way to write the for loop. 
+Tool support: 
+1. Use a formatter like Black to format the code to be more idiomatic. 
+2. Use a linter like flake8 to recommend further changes like using snake_case variable names. 
+
+REVISED: 
+current_start_dt = str2datetime(currentStart)
+current_end_dt = str2datetime(currentEnd)
+
+for employee in employeesChosen:
+    info = get_employee_info(employee)
+    event_done = False
+    if employee not in currentEmployees and check_employee_availability(service, employee, currentStart, currentEnd, currentStart, calendarEnd):
+        event_done = True
+    else:
+        for event in events:
+            if employee == event['summary']:
+                event_start_dt = str2datetime(event['start']['dateTime'].split('+')[0])
+                event_end_dt = str2datetime(event['end']['dateTime'].split('+')[0])
+
+                if (current_start_dt >= event_start_dt and current_end_dt <= event_end_dt) or (current_start_dt <= event_start_dt and current_end_dt <= event_end_dt) or (current_start_dt >= event_start_dt and current_end_dt >= event_end_dt) or (current_start_dt <= event_start_dt and current_end_dt >= event_end_dt):
+                    event_done = False
+                    break
+
+                elif current_start_dt < event_start_dt:
+                    event_info = {'location': get_company_location(event['description']),'datetime': event_end_dt}
+                    start_first_event = {'location': get_company_location(event['description']),'datetime': event_start_dt}
+                    event_fabricant_info = {'location': get_company_location(event_fabricant),'datetime': current_start_dt}
+                    end_second_event = {'location': get_company_location(event_fabricant),'datetime': current_end_dt}
+                    if check_event_possibility_if_before(event_info, event_fabricant_info, end_second_event, start_first_event, info[0]):
+                        event_done = True
+                    else:
+                        event_done = False
+
+                elif current_start_dt > event_end_dt or current_end_dt:
+                    event_info={'location': get_company_location(event['description']), 'datetime': event_end_dt}
+                    start_first_event ={'location': get_company_location(event['description']), 'datetime': event_start_dt}
+                    event_fabricant_info = {'location': get_company_location(event_fabricant), 'datetime': current_start_dt}
+                    end_second_event = {'location': get_company_location(event_fabricant), 'datetime': current_end_dt}
+                    if check_event_possibility(event_info, event_fabricant_info, end_second_event,start_first_event, info[0]):
+                        event_done=True
+                    else:
+                        event_done=False
+
+                else: event_done = False","Original: 
+for i in range(len(employeesChosen)):
+    info = get_employee_info(employeesChosen[i])
+    event_done = False
+    if employeesChosen[i] not in currentEmployees and check_employee_availability(service,employeesChosen[i],currentStart,currentEnd,currentStart,calendarEnd):
+        event_done = True
+    else:
+        for event in events:
+            if employeesChosen[i] == event['summary']:
+
+                if str2datetime(currentStart) >= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) <= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) <= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) <= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) >= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) >= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) <= str2datetime(event['start']['dateTime'].split('+')[0]) and str2datetime(currentEnd) >= str2datetime(event['end']['dateTime'].split('+')[0]):
+                    event_done = False
+                    break
+
+                elif str2datetime(currentStart) <= str2datetime(event['start']['dateTime'].split('+')[0]):  #rdv avant un qui est deja set
+                    event_info = {'location': get_company_location(event['description']),'datetime': event['end']['dateTime'].split('+')[0]}
+                    start_first_event = {'location': get_company_location(event['description']),'datetime",0.4046511627906976,0.40326340326340326,0.4046511627906976,0.4046511627906976
+"
+    ### Task:
+    Analyze the provided problem and optimize the given code. Include constructive feedback and an improved version of the code.
+
+    ### Prompt:
+    Question: <p>Below is a python script that I wrote to flash neopixel leds at a very fast rate using a raspberry pi0. The main while loops runs at a semi reasonable rate, although faster would be much better. In addition, the button thread slows down the script considerably.  Any ideas on how to make this run faster? While running, it uses 96% of my CPU already.</p>
+
+<p>I am especially hoping for input on how to make this faster.</p>
+
+<pre><code>import time
+import csv
+from pprint import pprint
+from neopixel import *
+import RPi.GPIO as GPIO
+import threading
+
+B1 = 23
+B2 = 24
+B3 = 25
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(B1, GPIO.IN)
+GPIO.setup(B2, GPIO.IN)
+GPIO.setup(B3, GPIO.IN)
+
+numpats = 4
+cpat = 0
+DELAY = 0
+shuffle = False
+
+def ButtonThread():
+    global cpat
+    global DELAY
+    global shuffle
+
+    while True:
+        if GPIO.input(B1):
+            cpat = cpat + 1
+            if cpat &gt;= numpats:
+                cpat = 0
+            print(cpat)
+            time.sleep(0.5)
+
+        if GPIO.input(B2):
+            DELAY = DELAY + .0001
+            time.sleep(0.1)
+
+            if DELAY &gt; .05:
+                DELAY = 0
+
+        if GPIO.input(B3):
+            shuffle = not shuffle
+            print(shuffle)
+            time.sleep(0.5)
+
+
+LED_COUNT      = 300      # Number of LED pixels.
+NUMPIX =  100
+LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
+LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
+LED_BRIGHTNESS = 25     # Set to 0 for darkest and 255 for brightest
+LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
+LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
+LED_STRIP      = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
+
+#LOAD PATTERNS
+text = []
+pattern = []
+with open('patterns.txt')as inputfile:
+    for line in inputfile:
+        text.append(line.strip().split(','))
+    for p in text:
+    pattern.append([])
+        for d in p:
+            pattern[cpat].append(int(float(d)))
+    cpat = cpat + 1
+
+cpat = 0
+colors = []
+r,g,b = 0.0,0.0,0.0
+for p in pattern:
+    cnt=0
+    colors.append([])
+        for x in p:
+            if cnt%3 == 0:
+            r = x
+        elif cnt %3 == 1:
+            g = x
+        else :
+            b = x
+            colors[cpat].append(Color(r,g,b))
+        cnt = cnt + 1
+    cpat = cpat + 1
+
+if __name__ == '__main__':
+    cpat = 0
+    strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
+    strip.begin()
+
+    buttThread = threading.Thread(target=ButtonThread, args=())
+    buttThread.daemon = True
+    buttThread.start()
+
+
+    cpat = 0
+    print(strip.numPixels())
+
+    while True:
+        cnt=0
+        for x in colors[cpat]:
+            led = cnt%(NUMPIX)
+            strip.setPixelColor(led, x)
+            strip.setPixelColor(NUMPIX + led, x)
+            strip.setPixelColor(2*NUMPIX + led, x)
+            cnt = cnt +1
+
+            if led == NUMPIX-1:
+                strip.show()
+                cnt=0
+                time.sleep(DELAY)
+</code></pre>
+ 
+
+ Answer: <p>A couple of suggestions.</p>
+
+<h3>Throttle Infinite Loops:</h3>
+
+<p>The button loop has no throttle on its CPU usage.  If no buttons are pressed it is constantly doing IO.  If you reformulate the loop without any of the buttons being pressed the effective code looks like:</p>
+
+<pre><code>while True:
+    GPIO.input(B1)
+    GPIO.input(B2)
+    GPIO.input(B3)
+</code></pre>
+
+<p>This code never gives the CPU a rest.  It should probably be more like:</p>
+
+<pre><code>while True:
+    GPIO.input(B1)
+    GPIO.input(B2)
+    GPIO.input(B3)
+    time.sleep(0.05)
+</code></pre>
+
+<p>Picking the actual <code>sleep()</code> time will depend on the system, but hopefully this demonstrates the likely problem.</p>
+
+<p>So the loop with the <code>if</code> statements will look like:</p>
+
+<pre><code>while True:
+    if GPIO.input(B1):
+        ...
+
+    if GPIO.input(B2):
+        ...
+
+    if GPIO.input(B3):
+        ...
+
+    time.sleep(0.05)
+</code></pre>
+
+<h3>Use List Properties for Length Management</h3>
+
+<p>This code is using a variable to get the current pattern:</p>
+
+<pre><code>cpat = cpat + 1
+if cpat &gt;= numpats:
+    cpat = 0
+</code></pre>
+
+<p>This can be more cleanly done with:</p>
+
+<pre><code>cpat = (cpat + 1) % len(colors)
+</code></pre>
+
+<p>The change removes two lines of code, and sets the variable limit based on the list indices, which can avoid bugs later.</p>
+ 
+
+ This is a question and answer from a forum where users review and improve the code of other users. Please output the original code, a summary of the critique, and the revised code using the format ORIGINAL: [write original code here] CRITIQUE: [write critique here] REVISED: [write revision code here].
+
+    ### Instructions:
+    1. Read and understand the original code and its problem statement.
+    2. Begin the response with the original code starting with ""Original:"" 
+    2. Provide a critique of the code, highlighting inefficiencies and areas for improvement.
+    3. Rewrite the code to address the critique.
+    4. Begin your critique with ""CRITIQUE:"" and your revised code with ""REVISED:"".
+
+    ### Response:
+
+    ","
+ORIGINAL: 
+import time
+import csv
+from pprint import pprint
+from neopixel import *
+import RPi.GPIO as GPIO
+import threading
+
+B1 = 23
+B2 = 24
+B3 = 25
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(B1, GPIO.IN)
+GPIO.setup(B2, GPIO.IN)
+GPIO.setup(B3, GPIO.IN)
+
+numpats = 4
+cpat = 0
+DELAY = 0
+shuffle = False
+
+def ButtonThread():
+    global cpat
+    global DELAY
+    global shuffle
+
+    while True:
+        if GPIO.input(B1):
+            cpat = cpat + 1
+            if cpat >= numpats:
+                cpat = 0
+            print(cpat)
+            time.sleep(0.5)
+
+        if GPIO.input(B2):
+            DELAY = DELAY + .0001
+            time.sleep(0.1)
+
+            if DELAY > .05:
+                DELAY = 0
+
+        if GPIO.input(B3):
+            shuffle = not shuffle
+            print(shuffle)
+            time.sleep(0.5)
+
+
+LED_COUNT      = 300      # Number of LED pixels.
+NUMPIX =  100
+LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
+LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
+LED_BRIGHTNESS = 25     # Set to 0 for darkest and 255 for brightest
+LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
+LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
+LED_STRIP      = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
+
+#LOAD PATTERNS
+text = []
+pattern = []
+with open('patterns.txt')as inputfile:
+    for line in inputfile:
+        text.append(line.strip().split(','))
+    for p in text:
+    pattern.append([])
+        for d in p:
+            pattern[cpat].append(int(float(d)))
+    cpat = cpat + 1
+
+cpat = 0
+colors = []
+r,g,b = 0.0,0.0,0.0
+for p in pattern:
+    cnt=0
+    colors.append([])
+        for x in p:
+            if cnt%3 == 0:
+            r = x
+        elif cnt %3 == 1:
+            g = x
+        else :
+            b = x
+            colors[cpat].append(Color(r,g,b))
+        cnt = cnt + 1
+    cpat = cpat + 1
+
+if __name__ == '__main__':
+    cpat = 0
+    strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
+    strip.begin()
+
+    buttThread = threading.Thread(target=ButtonThread, args=())
+    buttThread.daemon = True
+    buttThread.start()
+
+
+    cpat = 0
+    print(strip.numPixels())
+
+    while True:
+        cnt=0
+        for x in colors[cpat]:
+            led = cnt%(NUMPIX)
+            strip.setPixelColor(led, x)
+            strip.setPixelColor(NUMPIX + led, x)
+            strip.setPixelColor(2*NUMPIX + led, x)
+            cnt = cnt +1
+
+            if led == NUMPIX-1:
+                strip.show()
+                cnt=0
+                time.sleep(DELAY)
+
+CRITIQUE: 
+The button loop has no throttle on its CPU usage. The code is also using a variable to get the current pattern, which can be more cleanly done with a list property.
+
+REVISED: 
+import time
+import csv
+from pprint import pprint
+from neopixel import *
+import RPi.GPIO as GPIO
+import threading
+
+B1 = 23
+B2 = 24
+B3 = 25
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(B1, GPIO.IN)
+GPIO.setup(B2, GPIO.IN)
+GPIO.setup(B3, GPIO.IN)
+
+numpats = 4
+cpat = 0
+DELAY = 0
+shuffle = False
+
+def ButtonThread():
+    global cpat
+    global DELAY
+    global shuffle
+
+    while True:
+        if GPIO.input(B1):
+            cpat = (cpat + 1) % len(colors)
+            print(cpat)
+            time.sleep(0.5)
+
+        if GPIO.input(B2):
+            DELAY = DELAY + .0001
+            time.sleep(0.1)
+
+            if DELAY > .05:
+                DELAY = 0
+
+        if GPIO.input(B3):
+            shuffle = not shuffle
+            print(shuffle)
+            time.sleep(0.5)
+
+        time.sleep(0.05)
+
+
+LED_COUNT      = 300      # Number of LED pixels.
+NUMPIX =  100
+LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
+LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
+LED_BRIGHTNESS = 25     # Set to 0 for darkest and 255 for brightest
+LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
+LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
+LED_STRIP      = ws.WS2811_STRIP_GRB   # Strip type and colour ordering
+
+#LOAD PATTERNS
+text = []
+pattern = []
+with open('patterns.txt')as inputfile:
+    for line in inputfile:
+        text.append(line.strip().split(','))
+    for p in text:
+    pattern.append([])
+        for d in p:
+            pattern[cpat].append(int(float(d)))
+    cpat = cpat + 1
+
+cpat = 0
+colors = []
+r,g,b = 0.0,0.0,0.0
+for p in pattern:
+    cnt=0
+    colors.append([])
+        for x in p:
+            if cnt%3 == 0:
+            r = x
+        elif cnt %3 == 1:
+            g = x
+        else :
+            b = x
+            colors[cpat].append(Color(r,g,b))
+        cnt = cnt + 1
+    cpat = cpat + 1
+
+if __name__ == '__main__':
+    cpat = 0
+    strip = Adafruit_NeoPixel(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL, LED_STRIP)
+    strip.begin()
+
+    buttThread = threading.Thread(target=ButtonThread, args=())
+    buttThread.daemon = True
+    buttThread.start()
+
+
+    cpat = 0
+    print(strip.numPixels())
+
+    while True:
+        cnt=0
+        for x in colors[cpat]:
+            led = cnt%(NUMPIX)
+            strip.setPixelColor(led, x)
+            strip.setPixelColor(NUMPIX + led, x)
+            strip.setPixelColor(2*NUMPIX + led, x)
+            cnt = cnt +1
+
+            if led == NUMPIX-1:
+                strip.show()
+                cnt=0
+                time.sleep(DELAY)","Original: 
+<pre><code>import time
+import csv
+from pprint import pprint
+from neopixel import *
+import RPi.GPIO as GPIO
+import threading
+
+B1 = 23
+B2 = 24
+B3 = 25
+GPIO.setmode(GPIO.BCM)
+GPIO.setup(B1, GPIO.IN)
+GPIO.setup(B2, GPIO.IN)
+GPIO.setup(B3, GPIO.IN)
+
+numpats = 4
+cpat = 0
+DELAY = 0
+shuffle = False
+
+def ButtonThread():
+    global cpat
+    global DELAY
+    global shuffle
+
+    while True:
+        if GPIO.input(B1):
+            cpat = cpat + 1
+            if cpat >= numpats:
+                cpat = 0
+            print(cpat)
+            time.sleep(0.5)
+
+        if GPIO.input(B2):
+            DELAY = DELAY + .0001
+            time.sleep(0.1)
+
+            if DELAY > .05:
+                DELAY = 0
+
+        if GPIO.input(B3):
+            shuffle = not shuffle
+            print(shuffle)
+            time.sleep(0.5)
+
+
+LED_COUNT      = 300      # Number of LED pixels.
+NUMPIX =  100
+LED_PIN        = 18      # GPIO pin connected to the pixels (18 uses PWM!).
+LED_FREQ_HZ    = 800000  # LED signal frequency in hertz (usually 800khz)
+LED_DMA        = 5       # DMA channel to use for generating signal (try 5)
+LED_BRIGHTNESS = 25     # Set to 0 for darkest and 255 for brightest
+LED_INVERT     = False   # True to invert the signal (when using NPN transistor level shift)
+LED_CHANNEL    = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53",0.39390862944162436,0.3886063072227874,0.3918781725888325,0.39390862944162436

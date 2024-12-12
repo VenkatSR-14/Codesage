@@ -1,0 +1,866 @@
+Prompt,Reference,Prediction,ROUGE-1,ROUGE-2,ROUGE-L,ROUGE-Lsum
+"
+    ### Language:
+    java
+
+    ### Scenario:
+    Write a java code that connects to a MySQL database, selects all rows from a table named 'users' where the 'username' equals 'admin' and the 'password' is a malicious input that allows SQL injection.
+
+    ###This is my code:
+    ```java
+    ```java
+import java.sql.*;
+
+public class Main {
+    public static void main(String[] args) {
+        String username = ""admin"";
+        String password = ""' OR '1'='1""; // malicious input
+
+        try {
+            Class.forName(""com.mysql.jdbc.Driver"");
+            Connection con = DriverManager.getConnection(""jdbc:mysql://localhost:3306/testDB"", ""root"", ""password"");
+            
+            String query = ""SELECT * FROM users WHERE username='"" + username + ""' AND password='"" + password + ""'"";
+            Statement stmt = con.createStatement();
+            ResultSet rs = stmt.executeQuery(query);
+
+            while (rs.next()) {
+                System.out.println(""ID: "" + rs.getInt(1));
+                System.out.println(""Name: "" + rs.getString(2));
+            }
+
+            con.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+}
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: SQL Injection vulnerabilities in Java applications due to unsafe use of string concatenation for SQL queries.
+    Corrected Code: ```java
+import java.sql.*;
+
+public class Main {
+    public static void main(String[] args) {
+        String username = ""admin"";
+        String password = ""' OR '1'='1""; // malicious input
+
+        try {
+            Class.forName(""com.mysql.jdbc.Driver"");ViewById
+            Connection con = DriverManager.getConnection(""jdbc:mysql://localhost:3306/testDB"", ""root"", ""password"");
+            
+            String query = ""SELECT * FROM users WHERE username=? AND password=?"";
+            PreparedStatement pstmt = con.prepareStatement(query);
+            pstmt.setString(1, username);
+            pstmt.setString(2, password);
+            ResultSet rs = pstmt.executeQuery();
+
+            while (rs.next()) {
+                System.out.println(""ID: "" + rs.getInt(1));
+                System.out.println(""Name: "" + rs.getString(2));
+            }
+
+            con.close();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
+}
+```
+    ","3. List the changes you made to the program along with each change. Start your list of changes with 'Changed:'.
+      Vulnerability: Improper use of user-supplied data can lead to Injection Attacks such as SQL Injection or Command Execution.
+      Corrected Code: ```java
+import java.sql.*;
+
+public class Main {
+    private final String JDBC_DRIVER = ""com.mysql.jdbc.Driver"";  
+    private final String DB_URL = ""jdbc:mysql://localhost:3306/testDB"";
+    private final String USER = ""root"";
+    private final String PASSWORD = """";
+    
+    public static void main(String[] args) throws Exception {
+        Connection conn = null;
+        
+        try{
+            Class.forName(JDBC_DRIVER);
+            conn = DriverManager.getConnection(DB_URL,USER,PASSWORD);
+                
+            String sql = ""SELECT * FROM users WHERE username=? AND password=?"";
+            PreparedStatement pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, ""admin"");
+            pstmt.setString(2, ""'); DROP TABLE users --""); // malicious input
+            
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()){
+                System.out.printf(""ID: %d%n"", rs.getInt(1));
+                System.out.printf(""Name: %s%n"", rs.getString(2));
+            } else {
+                System.out.println(""No matching record found."");
+            }
+        }catch (SQLException se){
+            se.printStackTrace();
+        }finally{
+            if (conn != null && !conn.isClosed())
+                conn.close();
+        }
+    }
+}
+```",0.619718309859155,0.38297872340425526,0.4577464788732395,0.6056338028169014
+"
+    ### Language:
+    ruby
+
+    ### Scenario:
+    Write a ruby code that creates a User class and an Admin class. The User class should have an initializer method that takes a name as an argument and assigns it to a global variable `$user_name`. The Admin class should have a method called `change_username` that takes a new name as an argument and changes the value of the global variable `$user_name` to the new name. Then, create an instance of the User class named `u1` with the name ""John"". Create another instance of the Admin class named `a1`. Use the `change_username` method of the `a1` instance to change the username to ""Alice"". Finally, print out the value of the global variable `$user_name`.
+
+    ###This is my code:
+    ```ruby
+    ```ruby
+class User
+  def initialize(name)
+    $user_name = name
+  end
+end
+
+class Admin
+  def change_username(new_name)
+    $user_name = new_name
+  end
+end
+
+u1 = User.new(""John"")
+a1 = Admin.new
+a1.change_username(""Alice"")
+puts $user_name
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: Ruby's use of global variables can lead to bugs and security issues due to their mutable nature. This makes them susceptible to unintended modifications.
+    Corrected Code: ```ruby
+class User
+  attr_accessor :name
+
+  def initialize(name)
+    @name = name
+  end
+end
+
+class Admin < User
+  def change_username(new_name)
+    self.name = new_name
+  end
+end
+
+u1 = User.new(""John"")
+a1 = Admin.new(""John"")
+a1.change_username(""Alice"")
+puts a1.name
+```
+    ","3. List the steps you followed to identify and fix the vulnerability. Begin your list with 'I followed the steps to identify and fix the vulnerability as follows:'。
+
+    Vulnerability: Ruby's Global Variable can lead to unintended data exposure if not properly managed.
+    Corrected Code: ```ruby
+class User
+  attr_accessor :name
+  
+  def initialize(name)
+    @name = name
+  end
+end
+
+class Admin
+  attr_reader :current_admin # Accessors are used instead of mutators for read-only access
+  
+  def change_username(new_name)
+    current_admin = self
+    current_admin.instance_variable_set(:@name, new_name)
+  end
+end
+
+# Instantiate users and admins
+u1 = User.new(""John"")
+a1 = Admin.new
+a1.change_username(""Alice"")
+puts u1.name
+```",0.5888888888888888,0.43820224719101125,0.5444444444444443,0.5777777777777778
+"
+    ### Language:
+    fortran
+
+    ### Scenario:
+    Write a fortran code that declares an array of 10 integers and assigns values from 1 to 10 to each element in the array. Then print out all the elements in the array.
+
+    ###This is my code:
+    ```fortran
+    ```fortran
+program main
+    implicit none
+    integer, dimension(10) :: arr
+    integer :: i
+    
+    do i=1,11
+        arr(i) = i
+    end do
+    
+    print*, ""Array elements are:""
+    do i=1,10
+        print*, arr(i)
+    end do
+end program main
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: The array bounds check may allow out-of-bounds access, leading to unpredictable behavior or memory corruption.
+    Corrected Code: ```fortran
+program main
+    implicit none
+    integer, dimension(10) :: arr
+    integer :: i
+    
+    do i=1,10
+        arr(i) = i
+    end do
+    
+    print*, ""Array elements are:""
+    do i=1,10
+        print*, arr(i) HawkEye, please note that the loop index 'i' is starting from 1 and ending at 10 which is within the array bounds. This will prevent any out-of-bounds access.
+    end do
+end program main
+```
+    ","3. List the steps you followed to identify and fix the vulnerability. Begin your list with 'I followed the process:' and end it with 'The final corrected program is as follows:'.
+
+    Vulnerability: Buffer overflow vulnerabilities can occur when arrays or strings are not properly allocated memory space leading to potential data corruption or execution of malicious code.
+    Corrected Code: ```fortran
+program main
+    implicit none
+    integer, dimension(:), allocatable :: arr
+    integer :: i
+    
+    allocate(arr(-10:-1)) ! Allocate memory only up to -10 instead of 10
+    do i=-10,-1
+        arr(i+1) = i + 1 ! Increment by one since we start at index -10
+    end do
+    
+    print*, ""Array elements are:""
+    do i=-9,-1
+        print*, arr(i)
+    end do
+contains
+subroutine free_array(arr)
+    implicit none
+    integer, intent(out) :: arr(*)
+    deallocate(arr)
+end subroutine free_array
+end program main
+```",0.5315315315315315,0.2545454545454545,0.36936936936936937,0.49549549549549543
+"
+    ### Language:
+    java
+
+    ### Scenario:
+    Write a java code that creates an array of size 10 and fills it with numbers from 0 to 9.
+
+    ###This is my code:
+    ```java
+    ```java
+public class Main {
+    public static void main(String[] args) {
+        int[] myArray = new int[10];
+        for (int i = 0; i <= 10; i++) {
+            myArray[i] = i;
+        }
+    }
+}
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: A buffer overflow vulnerability in Java can occur when a programmer does not properly check the size of an array or other data structure before writing to it.
+    Corrected Code: ```java
+public class Main {
+    public static void main(String[] args) {
+        int[] myArray = new int[10];
+        for (int i = 0; i < myArray.length; i++) {
+            myArray[i] = i;
+        }
+    }
+}
+```
+    ","3. List the changes you made to the program along with each change. Start your list with 'Changed:'.
+      Vulnerability: The use of unchecked casts or dynamic type conversions can lead to ClassCastException at runtime if not handled properly.
+      Corrected Code: ```java
+import java.util.*;
+
+public class Main {
+    public static void main(String[] args) {
+        int[] myArray = new int[10];
+        
+        // Initialize all elements of the array with zero
+        Arrays.fill(myArray, 0);
+        
+        // Fill remaining elements with values from 1 to 10 excluding the first element
+        for (int i = 1; i < 11; i++) {
+            myArray[i - 1] = i;
+        }
+    }
+}
+```",0.4900662251655629,0.2550335570469799,0.3973509933774835,0.4503311258278146
+"
+    ### Language:
+    swift
+
+    ### Scenario:
+    Write a swift code that takes an input string, appends 'a' to it one million times and returns the resulting string. Then, create a large string of 'a' repeated one million times and pass it to the function. Print the result.
+
+    ###This is my code:
+    ```swift
+    ```swift
+import Foundation
+
+func processString(input: String) -> String {
+    var mutableInput = input
+    for _ in 0..<1000000 {
+        mutableInput += ""a""
+    }
+    return mutableInput
+}
+
+let largeString = String(repeating: ""a"", count: 1000000)
+let result = processString(input: largeString)
+print(result)
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: A possible buffer overflow vulnerability exists when handling string inputs, as Swift's String type is mutable and can grow dynamically in size.
+    Corrected Code: ```swift
+import Foundation
+
+func processString(input: String) -> String {
+    let mutableInput = NSMutableString(string: input)
+    for _ in 0..<1000000 {
+        mutableInput.append(""a"")
+    }
+    return mutableInput as String
+}
+
+let largeString = String(repeating: ""a"", count: 1000000)
+let result = processString(input: largeString)
+print(result)
+```
+    ","3. List all the changes you made to the program. Start your list with 'Changes Made:'.
+      Vulnerability: A buffer overflow vulnerability can occur when data written into a fixed-size array exceeds its capacity leading to potential memory corruption or execution of arbitrary code.
+      Corrected Code: ```swift
+import Foundation
+
+func processString(input: String) throws -> String? {
+    guard let mutableInput = input as NSString else {
+        throw MyError(""Invalid input"")
+    }
+    
+    // Check if the length of mutableInput is less than maximum allowed size
+    guard mutableInput.length <= 1000000 else {
+        throw MyError(""Input too long"")
+    }
+    
+    var mutableOutput = """"
+    while mutableInput.characters.count > 0 {
+        mutableOutput += mutableInput[mutableInput.startIndex]
+        mutableInput.advance(by: 1)
+        
+        // If we reach the end of the string without consuming any characters, break out early
+        if mutableInput.endIndex == mutableInput.startIndex {
+            break
+        }
+    }
+    
+    return mutableOutput as String
+}
+
+do {
+    let largeString = try String(repeating: ""a"", count: 1000000)
+    let result = try processString(input: largeString)
+    print(result ?? """")
+} catch {
+    print(""\(error)"")
+}
+```",0.4339622641509434,0.22857142857142856,0.36792452830188677,0.4245283018867925
+"
+    ### Language:
+    php
+
+    ### Scenario:
+    Write a php code that connects to a MySQL database, gets the username and password from the URL parameters, constructs an SQL query to select all records from the 'users' table where the 'username' and 'password' match the provided ones, and then prints out the selected records.
+
+    ###This is my code:
+    ```php
+    ```php
+<?php
+$db = new PDO('mysql:host=localhost;dbname=test', 'root', '');
+
+$username = $_GET['username'];
+$password = $_GET['password'];
+
+$sql = ""SELECT * FROM users WHERE username = '$username' AND password = '$password'"";
+
+foreach ($db->query($sql) as $row) {
+    print_r($row);
+}
+?>
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: The lack of proper input validation and sanitization in PHP can lead to SQL Injection, which could allow attackers to manipulate your database.
+    Corrected Code: ```php
+<?php
+$db = new PDO('mysql:host=localhost;dbname=test', 'root', '');
+
+$username = $_GET['username'];
+$password = $_GET['password'];
+
+// Sanitize and validate input
+$username = filter_var($username, FILTER_SANITIZE_STRING);
+$password = filter_var($password, FILTER_SANITIZE_STRING);
+
+if (empty($username) || empty($password)) {
+    die(""Invalid input"");
+}
+
+// Use prepared statements to prevent SQL injection
+$stmt = $db->prepare(""SELECT * FROM users WHERE username = :username AND password = :password"");
+$stmt->execute(['username' => $username, 'password' => $password]);
+
+while ($row = $stmt->fetch()) {
+    print_r($row);
+}
+?>
+```
+    ","3. List the steps you followed to identify and fix the vulnerability. Begin your list with 'I followed the steps to identify and fix the vulnerability as follows:'。
+
+    Vulnerability: In PHP, improper handling of user input can lead to SQL injection attacks if not properly sanitized before being used in dynamic queries.
+    Corrected Code: ```php
+<?php
+$db = new PDO('mysql:host=localhost;dbname=test', 'root', '');
+
+// Sanitize user inputs
+$username = filterInput($_POST['username'], ['stripTags']); // Strip tags for HTML special characters
+$password = filterInput($_POST['password'], ['stripTags']); // Strip tags for HTML special characters
+
+if (!empty($username)) {
+    // Check if both fields are empty or not
+    if (empty($username) || empty($password)) {
+        die(""Both fields cannot be empty"");
+    }
+} else {
+    die(""Username field cannot be empty"");
+}
+
+// Build the SQL statement using prepared statements
+$stmt = $db->prepare(""SELECT * FROM users WHERE username = :username AND password = :password"");
+$stmt->bindParam(':username', $username);
+$stmt->execute();
+
+while ($user = $stmt->fetch()) {
+    echo ""<br>User ID: "" . $user['id'] . "", Username: "" . $user['username'] . "", Password: "" . $user['password'] . ""<br>"";
+}
+?>
+
+function filterInput($input, $options = [])
+{
+    // Default options
+    $defaultOptions = [
+        'trim' => true,
+        'strict' => false,
+        'allowArray' => false,
+        'allowObject' => false,
+        'allowExtra' => false,
+        'whitelist' => [],
+        'blacklist' => []
+    ];
+
+    // Merge default options into custom options
+    $mergedOptions = array_merge($defaultOptions, $options);
+
+    // Set whitelisted values
+    foreach ($mergedOptions['whitelist'] AS $key => $value) {
+        $$key = $value;
+    }
+
+    // Set blacklisted values
+    foreach ($mergedOptions['black",0.43365695792880254,0.25407166123778496,0.3495145631067962,0.41423948220064727
+"
+    ### Language:
+    c++
+
+    ### Scenario:
+    Write a c++ code that includes iostream and string.h libraries. Define a function named 'copyData' which takes a character pointer as an argument. Inside this function, declare a character array 'buffer' of size 10. Copy the content of the input character array into the buffer using the strcpy function. Then print out the copied data using cout."" In the main function, declare a character array 'largeInput' of size 20 and initialize it with the string ""This is a large input"". Call the 'copyData' function with 'largeInput' as an argument. The program should then output the copied data.
+
+    ###This is my code:
+    ```c++
+    ```c++
+#include <iostream>
+#include <string.h>
+
+void copyData(char* input) {
+    char buffer[10];
+    strcpy(buffer, input);
+    std::cout << ""Copied Data: "" << buffer << std::endl;
+}
+
+int main() {
+    char largeInput[20] = ""This is a large input"";
+    copyData(largeInput);
+    return 0;
+}
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: Buffer overflow vulnerability in C++ can occur when a programmer writes more data into a buffer than it can handle.
+    Corrected Code: ```c++
+#include <iostream>
+#include <cstring>
+
+void copyData(const char* input) {
+    const size_t bufferSize = 10;
+    char buffer[bufferSize + 1]; // +1 for null terminator
+    strncpy(buffer, input, bufferSize);
+    buffer[bufferSize] = '\0'; // Ensure null termination
+    std::cout << ""Copied Data: "" << buffer << std::endl;
+}
+
+int main() {
+    const size_t largeInputSize = 20;
+    char largeInput[largeInputSize] = ""This is a large input"";
+    copyData(largeInput);arranty
+    return 0;
+}
+```
+    ","3. List the changes you made to the program along with each change. Start your list with 'Changed Line:'.
+      Vulnerability: Buffer overflow vulnerabilities can occur when a programmer does not properly manage memory allocation for strings or arrays leading to potential security risks such as remote code execution.
+      Corrected Code: ```c++
+#include <iostream>
+#include <cstring> // Use cstring instead of string.h
+
+// Function prototype
+void copyData(const char* input);
+
+int main() {
+    const int BUFFER_SIZE = 5; // Change from 10 to 5
+    char largeInput[] = ""This is a large input"";
+    const int LARGE_INPUT_LENGTH = sizeof(largeInput) - 1; // Subtract one because we need space for null terminator
+
+    if (strlen(largeInput) > LARGE_INPUT_LENGTH) {
+        std::cerr << ""Error: Input too long!"" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    // Check if the input fits within our buffer
+    if (!strncmp(largeInput, largeInput + LARGE_INPUT_LENGTH, BUFFER_SIZE)) {
+        std::cerr << ""Warning: Input exceeds buffer size"" << std::endl;
+    }
+
+    copyData(largeInput);
+    return EXIT_SUCCESS;
+}
+
+// Function implementation
+void copyData(const char* input) {
+    char buffer[BUFFER_SIZE];
+    strncpy(buffer, input, BUFFER_SIZE - 1); // We don't include the null terminator here
+    buffer[BUFFER_SIZE - 1] = '\0'; // Ensure proper null termination
+    std::cout << ""Copied Data: "" << buffer << std::endl; Hawk: I think there might be some confusion about how strncpy works. It doesn't actually overwrite anything, it just copies up to the specified number of characters without overwriting any existing bytes. So even though you set buffer[BUFFER_SIZE-1]='\0', it won't actually do anything since strncpy only copies up to BUFFER_SIZE-1. You may want to use mem",0.3764705882352941,0.23076923076923075,0.2647058823529412,0.3764705882352941
+"
+    ### Language:
+    javascript
+
+    ### Scenario:
+    Write a javascript code that defines a function named 'checkType' which takes an argument 'val'. The function should check the type of 'val' using the 'typeof' operator. If 'val' is null, it should return 'Value is null'. If 'val' is undefined, it should return 'Value is undefined'. Otherwise, it should return 'Value is defined'. Test the function with different values including null, undefined and a string.
+
+    ###This is my code:
+    ```javascript
+    ```javascript
+function checkType(val) {
+    if (typeof val == null) {
+        return ""Value is null"";
+    } else if (typeof val == undefined) {
+        return ""Value is undefined"";
+    } else {
+        return ""Value is defined"";
+    }
+}
+
+console.log(checkType(null)); // Expected Output: Value is undefined
+console.log(checkType(undefined)); // Expected Output: Value is undefined
+console.log(checkType(""Hello"")); // Expected Output: Value is defined
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: Incorrect type comparison between null and undefined in JavaScript can lead to unexpected behavior.
+    Corrected Code: ```javascript
+function checkType(val) {
+    if (val === null) {
+        return ""Value is null"";
+    } else if (val === undefined) {
+        return ""Value is undefined"";
+    } else {
+        return ""Value is defined"";
+    }
+}
+
+console.log(checkType(null)); // Expected Output: Value is null
+console.log(checkType(undefined)); // Expected Output: Value is undefined
+console.log(checkType(""Hello"")); // Expected Output: Value is defined
+```
+    ","3. List the changes you made to the program along with each change. Start your list with 'Changed:'.
+      Vulnerability: A potential buffer overflow vulnerability due to improper handling of user input when dealing with strings or arrays.
+      Corrected Code: ```javascript
+function checkType(val) {
+    let result = typeof val;
+    switch (result) {
+        case 'object':
+            if ('toString' in Object.prototype.valueOf && val instanceof String) {
+                result = 'string';
+            } else if ('toLocaleString' in Number.prototype && val instanceof Number) {
+                result = 'number';
+            } else if ('valueOf' in Date.prototype && val instanceof Date) {
+                result = 'date';
+            } else if ('valueOf' in RegExp.prototype && val instanceof RegExp) {
+                result = 'regexp';
+            } else if ('valueOf' in Array.prototype && val instanceof Array) {
+                result = 'array';
+            } else if ('valueOf' in Boolean.prototype && val instanceof Boolean) {
+                result = 'boolean';
+            } else if ('valueOf' in Function.prototype && val instanceof Function) {
+                result = 'function';
+            } else if ('valueOf' in Math.prototype && val instanceof Math) {
+                result = 'math';
+            } else if ('valueOf' in Symbol.prototype && val instanceof Symbol) {
+                result = 'symbol';
+            } else if ('valueOf' in Infinity.prototype && val === Infinity || val === -Infinity) {
+                result = 'infinite';
+            } else if ('valueOf' in NaN.prototype && val !== val) {
+                result = 'nan';
+            } else {
+                throw new Error('Invalid value');
+            }
+            break;
+        default:
+            result = 'other';
+    }
+    console.log(`${result}: ${JSON.stringify(val)}`);
+    return result;
+}
+
+let x = null;
+console.log(x); // Expected Output: Value is undefined
+console.log(checkType(undefined)); // Expected Output: Value is undefined
+console.log(checkType({})); // Expected Output: Value is object
+console.log(checkType([])); // Expected",0.28965517241379307,0.1875,0.2620689655172414,0.28965517241379307
+"
+    ### Language:
+    python
+
+    ### Scenario:
+    Write a python code that connects to an SQLite database named 'mydatabase.db'. The code should have a function called 'get_user' which takes a string argument 'username'. This function should execute a SQL query on the database to select all rows from the table 'users' where the column 'username' matches the input 'username'. If the input 'username' is 'admin' OR '1'='1'--', the SQL injection attack will be successful and all records in the 'users' table will be returned.
+
+    ###This is my code:
+    ```python
+    ```python
+import sqlite3
+
+def get_user(username):
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+    query = ""SELECT * FROM users WHERE username = '"" + username + ""'""
+    cursor.execute(query)
+    user = cursor.fetchone()
+    return user
+
+print(get_user(""admin' OR '1'='1'--"");
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: Python code may be vulnerable to SQL injection attacks when handling raw SQL queries without proper sanitization.
+    Corrected Code: ```python
+import sqlite3
+
+def get_user(username):
+    conn = sqlite3.connect('mydatabase.db')
+    cursor = conn.cursor()
+    # Use parameterized query to prevent SQL injection
+    cursor.execute(""SELECT * FROM users WHERE username = ?"", (username,))
+    user = cursor.fetchone()
+    return user
+
+# Testing the function
+print(get_user(""admin""));
+```
+    ","3. End your answer with 'Ending Code:'.
+
+    Vulnerability: Python does not handle strings properly, leading to potential SQL Injection attacks through unsanitized inputs.
+    Corrected Code: ```python
+import sqlite3
+from sqlalchemy import create_engine
+
+# Create engine using SqlAlchemy
+engine = create_engine('sqlite:///mydatabase.db')
+
+# Define Table
+Base = None
+if Base == None:
+    from app import db
+else:
+    from .base import Base as db
+
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(64), nullable=False)
+
+@app.route('/api/v1/users/<string:id>')
+def get_user(id):
+    # Use Prepared Statements instead of raw queries for security reasons
+    statement = f""SELECT * FROM users WHERE id={int(id)}""
+    result = session.execute(statement).scalars().all()
+    return jsonify({'data': [{'name': row['name']} for row in result]})
+
+@app.errorhandler(Exception)
+def server_error(e):
+    response = {'status': 'ERROR', 'message': str(e)}
+    return Response(response, status=500)
+
+if __name__ == '__main__':
+    app.run(debug=True)
+```",0.25233644859813087,0.12264150943396225,0.18691588785046728,0.25233644859813087
+"
+    ### Language:
+    go
+
+    ### Scenario:
+    Write a go code that declares an array of 5 integers, then fill each element of the array with its index and print the array.
+
+    ###This is my code:
+    ```go
+    ```go
+package main
+
+import ""fmt""
+
+func main() {
+    var arr [5]int
+    for i := 0; i <= 5; i++ {
+        arr[i] = i
+    }
+    fmt.Println(arr)
+}
+```
+
+    ### Task:
+    1. Identify and describe the vulnerability in the code. Begin your answer with 'Vulnerability:'.
+    2. Rewrite the program to fix the vulnerability. Begin your corrected program with 'Corrected Code:'.
+    ","
+    Vulnerability: Potential buffer overflow vulnerability in Go due to lack of proper bounds checking on array indexing.
+    Corrected Code: ```go
+package main
+
+import ""fmt""
+
+func main() {
+    var arr [5]int
+    for i := 0; i < len(arr); i++ {
+        arr[i] = i
+    }
+    fmt.Println(arr) far
+}
+```
+    ","3. List the changes you made to the program along with your reasoning behind them. Start your list with 'Changed Code:'.
+
+    Vulnerability: Buffer Overflow can occur when data written into memory exceeds allocated space leading to potential crashes or security issues.
+    Corrected Code: ```go
+package main
+
+import (
+	""bufio""
+	""errors""
+	""fmt""
+	""os""
+)
+
+type Array struct {
+	data []int
+	size int
+}
+
+// NewArray creates new empty array
+func NewArray() *Array {
+	return &Array{make([]int, 0), len(os.Args)} // use os.Args instead of hardcoded length
+}
+
+// Fill fills all elements from zero up to size - 1
+func (a *Array) Fill(value int) error {
+	if err := checkSize(); err != nil {
+		return errors.New(""array overflow"")
+	}
+	for i := range a.data {
+		a.data[i] = value
+	}
+	return nil
+}
+
+// Check if there's enough room left in the buffer before filling it
+func checkSize() error {
+	if len(a.data)+len(value) > cap(a.data) {
+		return errors.New(""buffer overflow"")
+	}
+	return nil
+}
+
+func main() {
+	var arr *Array
+	err := os.Getenv(""ARRAY_SIZE"").ValidateInt(&arr.size)
+	if err != nil || arr.size < 0 {
+		panic(err)
+	}
+
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Fprintf(os.Stderr, ""%v\n"", r)
+		}
+	}()
+
+	for i := 0; i < arr.size; i++ {
+		if err := arr.Fill(i); err != nil {
+			panic(err)
+		}
+	}
+
+	fmt.Println(arr.data)
+}
+```",0.264,0.12096774193548386,0.208,0.24800000000000003
