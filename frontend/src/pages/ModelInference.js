@@ -48,7 +48,7 @@ const ModelInference = () => {
         return;
       }
 
-      const ngrokUrl = "https://3092-34-41-194-171.ngrok-free.app"; // Replace with your ngrok URL
+      const ngrokUrl = "https://433d-34-87-137-1.ngrok-free.app"; // Replace with your ngrok URL
       const localBaseUrl = "http://localhost:8000";
       const baseUrl = endpoint.includes("gpt") ? localBaseUrl : ngrokUrl;
 
